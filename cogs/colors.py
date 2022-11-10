@@ -40,7 +40,7 @@ class Colors(commands.Cog):
             RoleList += f"<@&{r.id}>  "
 
         view = self.ColorView(ctx, ColorRoles, self)
-        embed = discord.Embed(color=0x299aff, description=f"*Hello <@{ctx.user.id}>, your current color is {userColor}\n\nAvailable colors are: {RoleList}*")
+        embed = discord.Embed(color=0x299aff, description=f"*Hello <@{ctx.user.id}>, your current color is {UserColor}\n\nAvailable colors are: {RoleList}*")
 
         return embed, view
 
