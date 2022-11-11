@@ -6,7 +6,7 @@ from cogs import roles, colors
 load_dotenv()
 
 TOKEN = os.getenv("DEBUG_TOKEN") if os.getenv("DEBUG") == "True" else os.getenv("PROD_TOKEN")
-GUILDS = [int(g) for g in os.getenv("GUILDS").split(",")]
+GUILDS = [int(g) for g in os.getenv("GUILDS").split(",")] if os.getenv("GUILDS") else []
 
 bot = discord.Bot(debug_guilds=GUILDS)
 
