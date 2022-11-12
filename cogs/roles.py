@@ -18,23 +18,26 @@ class Roles(commands.Cog):
         """
         print(f"[roles] Responding to {ctx.user}")
 
-        roles = ctx.user.roles
-        embed, view = self.GetMessage(ctx, roles)
+        UserRoles = ctx.user.roles
+        embed, view = self.GetMessage(ctx, UserRoles)
 
         await ctx.respond(ephemeral=True, embed=embed, view=view)
 
-    def GetMessage(self, ctx, roles, LastUpdate = None):
-        RoleList = ""
+    def GetMessage(self, ctx, UserRoles, LastUpdate = None):
+        """
+        Builds & returns the message to /commands and interactions
+        """
+        RoleString = ""
         # Here we build the list of the user's current roles
-        for r in reversed(roles):
+        for r in reversed(UserRoles):
             if r.id not in self.exclude:
-                RoleList += f"<@&{r.id}> "
+                RoleString += f"<@&{r.id}> "
 
         # Prepare the View. If the user has selected a role, pass it along (LastUpdate)
         view = self.RoleView(ctx, LastUpdate, self)
 
-        # Prepare the embed with the above RoleList
-        embed = discord.Embed(color=0x299aff, description=f"*Hello <@{ctx.user.id}>, your current roles are:\n{RoleList}\n\nUse the menus below to add or remove roles.*")
+        # Prepare the embed with the above RoleString
+        embed = discord.Embed(color=0x299aff, description=f"*Hello <@{ctx.user.id}>, your current roles are:\n{RoleString}\n\nUse the menus below to add or remove roles.*")
 
         return embed, view
 
@@ -48,7 +51,7 @@ class Roles(commands.Cog):
                 self.add_item(cog.RoleDropdown(ctx, cog, m["placeholder"], m["roles"], LastUpdate))
 
     class RoleDropdown(discord.ui.Select):
-        def __init__(self, ctx, cog, placeholder, roles, LastUpdate = None):
+        def __init__(self, ctx, cog, placeholder, roles, LastUpdate):
             self.ctx = ctx
             self.cog = cog
             options = []
@@ -84,7 +87,7 @@ class Roles(commands.Cog):
             """
             Respond to a user selecting a role from a menu
             """
-
+            roles = interaction.user.roles
             for r in self.values:
                 # Get the role the user has selected
                 role = interaction.guild.get_role(int(r))
