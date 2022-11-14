@@ -24,6 +24,7 @@ settings = {
         "dropdowns": [
             {
                 "placeholder": "EVE Online roles",
+                "randomize": 0,
                 "roles": [
                     # [<id>, "<description>", "<emoji>"]
                     [880572127823159366, "", ""],
@@ -33,6 +34,7 @@ settings = {
             },
             {
                 "placeholder": "🏳️‍🌈 LGBT roles - Grant access to the #🌈lgbt channel",
+                "randomize": 0,
                 "roles": [
                     # [<id>, "<description>", "<emoji>"]
                     [1007573574082642011, "", ""],
@@ -49,6 +51,7 @@ settings = {
             },
             {
                 "placeholder": "Misc/Topic roles",
+                "randomize": 0,
                 "roles": [
                     # [<id>, "<description>", "<emoji>"]
                     [1037691564954238996, "Grants access to the neurodivergent chat channel", ""],
@@ -74,6 +77,7 @@ settings = {
         "dropdowns": [
             {
                 "placeholder": "Select your role icon",
+                "randomize": 1,
                 "roles":  [
                     [1041322728365506620,"","<:logo:875904386444967946>"],
                     [1041322473783840888,"","<:corplogo:787272419127722004>"],
@@ -88,7 +92,11 @@ settings = {
                     [1041322264815218688,"","<:AromanticPride:1007623034959581245>"],
                     [1041322146636513360,"","<:NeurodiversityPride:1037203581733974026>"],
                     [1041322094543261716,"","<:freighter:1040091624715341865>"],
-                    [1041322195701481502,"","📚"]
+                    [1041322195701481502,"","📚"],
+                    [1041335138434424942,"","🥐"],
+                    [1041543542423691336,"","🦑"],
+                    [1041543751845290024,"","🐳"],
+                    [1041543812272623737,"","🦀"]
                 ]
             }
         ]

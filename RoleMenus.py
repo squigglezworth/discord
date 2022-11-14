@@ -1,4 +1,5 @@
 import discord, re, random
+from random import shuffle
 from discord.ext import commands
 
 class BuildDropdown(discord.ui.Select):
@@ -7,6 +8,9 @@ class BuildDropdown(discord.ui.Select):
         self.dropdown = dropdown
         self.settings = settings
         self.ctx = ctx
+
+        if dropdown["randomize"]:
+            shuffle(dropdown["roles"])
 
         # Start building the dropdown menu for a given list of 'roles'
         for r in dropdown["roles"]:
