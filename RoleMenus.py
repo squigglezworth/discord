@@ -37,9 +37,9 @@ class BuildDropdown(discord.ui.Select):
                 description=description,
                 value=str(role.id)
             )
+            # Add the emoji provided during setup
             if r[2]:
                 option.emoji = r[2]
-
             options += [option]
 
         # Assemble & return the dropdown menu
@@ -73,7 +73,11 @@ class BuildDropdown(discord.ui.Select):
                 # If specified, only allow 1 role from this menu
                 if self.settings["max_one"]:
                     print(f"[roles - {self.ctx.command}] max_one specified; removing all roles")
-                    for f in filter(lambda r: r.id in [r[0] for r in self.dropdown["roles"]], interaction.user.roles):
+                    # Assemble a list of all roles for this menu
+                    for m in self.settings["dropdowns"]:
+                        for r in m["roles"]:
+                            MenuRoles += r
+                    for f in filter(lambda r: r.id in [r[0] for r in MenuRoles], interaction.user.roles):
                         LastUpdates.append([0,f])
                     UserRoles = list(filter(lambda r: r.id not in [r[0] for r in self.dropdown["roles"]], interaction.user.roles))
 
@@ -112,11 +116,14 @@ def BuildMessage(ctx, UserRoles, menu, LastUpdates = None):
     Builds & returns the message (embed & view) to /commands and interactions
     """
     MenuRoles = []
+    RolesList = ""
+    ShortRolesList = ""
+
+    # Assemble a list of all roles for this menu
     for m in menu["dropdowns"]:
         for r in m["roles"]:
             MenuRoles += r
-    RolesList = ""
-    ShortRolesList = ""
+
     # Here we build the list of the user's current roles
     for r in reversed(UserRoles):
         if r.id not in menu["exclude"]:
@@ -130,10 +137,13 @@ def BuildMessage(ctx, UserRoles, menu, LastUpdates = None):
     # If the user has selected a role, pass it along (LastUpdate)
     view = BuildView(menu, ctx, LastUpdates)
 
-    # Prepare the embed with the above RoleString
-    #"embed": "*Hello <@{ctx.user.id}>, your current roles are:\n{RoleString}\n\nUse the menus below to add or remove roles.*",
-
-    embed = discord.Embed(color=0x299aff, description=menu["embed"].format(ctx=ctx,RolesList=RolesList, ShortRolesList=ShortRolesList))
+    # Prepare the embed
+    data = {
+        "ctx": ctx,
+        "RolesList": RolesList,
+        "ShortRolesList": ShortRolesList
+    }
+    embed = discord.Embed(color=0x299aff, description=menu["embed"].format(**data))
 
     return embed, view
 

@@ -9,7 +9,9 @@ load_dotenv()
 TOKEN = os.getenv("DEBUG_TOKEN") if os.getenv("DEBUG") == "True" else os.getenv("PROD_TOKEN")
 GUILDS = [int(g) for g in os.getenv("GUILDS").split(",")] if os.getenv("GUILDS") else []
 
-# There can be a max of 5 menus
+# settings = {
+# }
+
 settings = {
     "roles": {
         "name": "roles",
@@ -68,19 +70,27 @@ settings = {
         # Command description
         "description": "Stand out with a fancy icon that will appear next to your name in chat",
         # Embed content
-        "embed": "*Hello <@{ctx.user.id}>, your current icon role is {ShortRolesList}*",
-        # Allow only 1 of the provided roles
+        "embed": "*Hello <@{ctx.user.id}>, your current icon role is {ShortRolesList}\n\nSelect one below, and it'll show up next to your name in chat!*",
+        # Allow only 1 of *all* the provided roles
         "max_one": 1,
         # List of role IDs to exclude from the listing of the user's current roles
         # @everyone is automatically excluded
         "exclude": [],
         "dropdowns": [
             {
-                "placeholder": "Select your role icon",
+                "placeholder": "🦉 Animal Icons",
+                "randomize": 1,
+                "roles": [
+                    [1041543542423691336,"","🦑"],
+                    [1041543751845290024,"","🐳"],
+                    [1041543812272623737,"","🦀"],
+                    [1041719288437944410,"", "🦉"]
+                ]
+            },
+            {
+                "placeholder": "🏳️‍🌈 LGBT Icons",
                 "randomize": 1,
                 "roles":  [
-                    [1041322728365506620,"","<:logo:875904386444967946>"],
-                    [1041322473783840888,"","<:corplogo:787272419127722004>"],
                     [1041321819984105512,"","<:LesbianPride:1007578778035290112>"],
                     [1041321894927937646,"","<:GayPride:1007578774897954867>"],
                     [1041321919984713848,"","<:BisexualPride:1007578776630198303>"],
@@ -90,13 +100,18 @@ settings = {
                     [1041322026234822716,"","⚧"],
                     [1041322212982018059,"","<:AsexualPride:1007623033189568562>"],
                     [1041322264815218688,"","<:AromanticPride:1007623034959581245>"],
-                    [1041322146636513360,"","<:NeurodiversityPride:1037203581733974026>"],
+                    [1041322146636513360,"","<:NeurodiversityPride:1037203581733974026>"]
+                ]
+            },
+            {
+                "placeholder": "🥐 Misc. Icons",
+                "randomize": 1,
+                "roles": [
+                    [1041322728365506620,"","<:logo:875904386444967946>"],
+                    [1041322473783840888,"","<:corplogo:787272419127722004>"],
                     [1041322094543261716,"","<:freighter:1040091624715341865>"],
                     [1041322195701481502,"","📚"],
-                    [1041335138434424942,"","🥐"],
-                    [1041543542423691336,"","🦑"],
-                    [1041543751845290024,"","🐳"],
-                    [1041543812272623737,"","🦀"]
+                    [1041335138434424942,"","🥐"]
                 ]
             }
         ]
