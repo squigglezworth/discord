@@ -1,4 +1,4 @@
-# ⚙️ Some small cogs for Pycord
+# ⚙️ Some things for Pycord
 
 <details>
   <summary><i><a href="cogs/roles.py"><b>roles</b></a> - Sends a simple interactive role management UI to the user</i></summary>
