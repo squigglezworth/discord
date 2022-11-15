@@ -65,7 +65,7 @@ class BuildDropdown(discord.ui.Select):
                 # Prepare info for updating the message
                 # deleted, role
                 LastUpdates.append([0, role])
-                # Add/remove it from the list of user's current roles, which will be displayed when the message is updated
+                # Remove it from a list of user's current roles, which will be displayed when the message is updated
                 UserRoles.remove(role)
 
                 await interaction.user.remove_roles(role)
@@ -73,14 +73,21 @@ class BuildDropdown(discord.ui.Select):
                 # If specified, only allow 1 role from this menu
                 if self.settings["max_one"]:
                     print(f"[roles - {self.ctx.command}] max_one specified; removing all roles")
+
+                    MenuRoles = []
                     # Assemble a list of all roles for this menu
                     for m in self.settings["dropdowns"]:
                         for r in m["roles"]:
-                            MenuRoles += r
-                    for f in filter(lambda r: r.id in [r[0] for r in MenuRoles], interaction.user.roles):
-                        LastUpdates.append([0,f])
-                    UserRoles = list(filter(lambda r: r.id not in [r[0] for r in self.dropdown["roles"]], interaction.user.roles))
+                            MenuRoles += [r[0]]
 
+                    # Add all the roles we're about to remove to the LastUpdates array
+                    for f in filter(lambda r: r.id in [r for r in MenuRoles], interaction.user.roles):
+                        LastUpdates.append([0,f])
+
+                    # Filter out the roles in this menu from the user's roles
+                    UserRoles = list(filter(lambda r: r.id not in [r for r in MenuRoles], interaction.user.roles))
+
+                    # Update the user's roles
                     await interaction.user.edit(roles=UserRoles)
 
                 print(f"[roles - {self.ctx.command}] Adding roles to {interaction.user}")
@@ -88,13 +95,14 @@ class BuildDropdown(discord.ui.Select):
                 # Prepare info for updating the message
                 # added, role
                 LastUpdates.append([1, role])
-                # Add/remove it from the list of user's current roles, which will be displayed when the message is updated
+                # Add it to a list of user's current roles, which will be displayed when the message is updated
                 UserRoles.insert(0, role)
 
+                # Finally add the role to the user
                 await interaction.user.add_roles(role)
 
         # Retrieve the message embed & view
-        # The embed contains a list of the user's current roles
+        # The embed contains some message, usually a list of the user's roles
         # The view contains the dropdown menus
         embed, view = BuildMessage(self.ctx, UserRoles, self.settings, LastUpdates)
 
@@ -122,11 +130,11 @@ def BuildMessage(ctx, UserRoles, menu, LastUpdates = None):
     # Assemble a list of all roles for this menu
     for m in menu["dropdowns"]:
         for r in m["roles"]:
-            MenuRoles += r
+            MenuRoles += [r[0]]
 
     # Here we build the list of the user's current roles
     for r in reversed(UserRoles):
-        if r.id not in menu["exclude"]:
+        if r.id not in menu["exclude"] + [484805623209525258]:
             RolesList += f"<@&{r.id}> "
         if r.id in MenuRoles:
             ShortRolesList += f"<@&{r.id}> "
