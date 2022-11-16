@@ -2,17 +2,20 @@ import discord, re, random
 from discord.ext import commands
 
 class Colors(commands.Cog):
-    def __init__(self, ctx, prefix, guilds = None):
-        self.ctx = ctx
+    def __init__(self, bot, prefix, guilds = None):
+        self.bot = bot
         self.prefix = prefix
 
-        print(f"[colors] Registering" + (f" on {len(guilds)} guilds" if guilds else " globally"))
+        print(f"[colors] Registering /colors" + (f" on {len(guilds)} guilds" if guilds else " globally"))
 
-    @commands.slash_command()
-    async def colors(self, ctx):
-        """
-        Give your messages a bit of flair with a fancy color role!
-        """
+        command = discord.SlashCommand(
+                            self.CommandCallback,
+                            name="colors",
+                            description="Give your messages a bit of flair with a fancy color role!")
+
+        bot.add_application_command(command)
+
+    async def CommandCallback(self, ctx):
         print(f"[colors] Responding to {ctx.user}")
 
         roles = await ctx.guild.fetch_roles()
@@ -59,7 +62,7 @@ class Colors(commands.Cog):
 
             for r in ColorRoles:
                 options += [discord.SelectOption(
-                    label = r.name,
+                    label = r.name.removeprefix(cog.prefix),
                     value = str(r.id)
                 )]
 

@@ -1,14 +1,3 @@
-from dotenv import load_dotenv
-import discord, os
-
-import RoleMenus
-from cogs import colors
-
-load_dotenv()
-
-TOKEN = os.getenv("DEBUG_TOKEN") if os.getenv("DEBUG") == "True" else os.getenv("PROD_TOKEN")
-GUILDS = [int(g) for g in os.getenv("GUILDS").split(",")] if os.getenv("GUILDS") else []
-
 # settings = {
 # }
 
@@ -29,9 +18,12 @@ settings = {
                 "randomize": 0,
                 "roles": [
                     # [<id>, "<description>", "<emoji>"]
-                    [880572127823159366, "", ""],
-                    [880572192872611871, "", ""],
-                    [885936958394748950, "", ""]
+                    [786356797429514261, "General EVE Online role", "<:eve:787273908528349204>"],
+                    [880572127823159366, "Get pings about mining fleets", "⛏️"],
+                    [880572192872611871, "Notifications about PVP fleets", "⚔️"],
+                    [885936958394748950, "Help the corp & corp members by hauling goods", "<:freighter:1040091624715341865>"],
+                    [1042294285741084743, "Share info about wormholes and other exploration sites", "<:wormhole:1042298751336861779>"],
+                    [1042294090802417694, "Buy & sell goods in #marketplace", "📈"]
                 ]
             },
             {
@@ -82,9 +74,11 @@ settings = {
                 "randomize": 0,
                 "roles": [
                     [1041543542423691336,"","🦑"],
+                    [1042254987855679568,"","<:blue_octopus2:1042254458882637876>"],
+                    [1042252793739739206,"","🐙"],
                     [1041543751845290024,"","🐳"],
                     [1041543812272623737,"","🦀"],
-                    [1041719288437944410,"", "🦉"],
+                    [1041719288437944410,"","🦉"],
                     [1041726074775687279,"","<:redpanda:1041725947243675729>"],
                     [1041726257957703791,"","🐱"],
                     [1041726321480454275,"","🐶"]
@@ -103,7 +97,6 @@ settings = {
                     [1041322026234822716,"","<:TransgenderSymbol:1007581443867815956>"],
                     [1041322212982018059,"","<:AsexualPride:1007623033189568562>"],
                     [1041322264815218688,"","<:AromanticPride:1007623034959581245>"],
-                    [1041322146636513360,"","<:NeurodiversityPride:1037203581733974026>"]
                 ]
             },
             {
@@ -112,6 +105,7 @@ settings = {
                 "roles": [
                     [1041322728365506620,"","<:logo:875904386444967946>"],
                     [1041322473783840888,"","<:corplogo:787272419127722004>"],
+                    [1041322146636513360,"","<:NeurodiversityPride:1037203581733974026>"],
                     [1041322094543261716,"","<:freighter:1040091624715341865>"],
                     [1041322195701481502,"","📚"],
                     [1041335138434424942,"","🥐"],
@@ -122,13 +116,26 @@ settings = {
     }
 }
 
+from dotenv import load_dotenv
+import discord, os
+
+import RoleMenus
+import memes
+from cogs import colors
+
+load_dotenv()
+
+TOKEN = os.getenv("DEBUG_TOKEN") if os.getenv("DEBUG") == "True" else os.getenv("PROD_TOKEN")
+GUILDS = [int(g) for g in os.getenv("GUILDS").split(",")] if os.getenv("GUILDS") else []
+
+
 bot = discord.Bot(debug_guilds=GUILDS)
 
-RoleMenus.register(bot, settings)
+RoleMenus.register(bot, settings, GUILDS)
 
 # Prefix your color roles with [C] (or change the prefix)
 bot.add_cog(colors.Colors(bot, "[C]", GUILDS))
-
+bot.add_cog(memes.Memes(bot, GUILDS))
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")

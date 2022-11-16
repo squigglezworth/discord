@@ -109,6 +109,37 @@ class BuildDropdown(discord.ui.Select):
         # Update the existing message with the embed & view
         await interaction.response.edit_message(embed=embed, view=view)
 
+class BuildClearButton(discord.ui.Button):
+    def __init__(self, settings, ctx, LastUpdates = None):
+        self.ctx = ctx
+        self.settings = settings
+        self.LastUpdates = LastUpdates
+
+        super().__init__(label="Clear all roles",
+                         style=discord.ButtonStyle.danger)
+
+    async def callback(self, interaction):
+        print(f"[roles - {self.ctx.command}] {interaction.user} selected 'Clear all'")
+
+        # Build a list of all roles in this menu
+        MenuRoles = []
+        for m in self.settings["dropdowns"]:
+            for r in m["roles"]:
+                MenuRoles += [r[0]]
+
+        # Add all the roles we're about to remove to the LastUpdates array
+        LastUpdates = []
+        for f in filter(lambda r: r.id in [r for r in MenuRoles], interaction.user.roles):
+            LastUpdates.append([0,f])
+
+        # Remove them from the user's roles and update the user
+        UserRoles = list(filter(lambda r: r.id not in [r for r in MenuRoles], interaction.user.roles))
+        await interaction.user.edit(roles=UserRoles)
+
+        # Update the message
+        embed, view = BuildMessage(self.ctx, UserRoles, self.settings, LastUpdates)
+        await interaction.response.edit_message(embed=embed, view=view)
+
 class BuildView(discord.ui.View):
     """
     Assemble the dropdowns for a given menu into a View
@@ -118,6 +149,7 @@ class BuildView(discord.ui.View):
 
         for dropdown in menu["dropdowns"]:
             self.add_item(BuildDropdown(dropdown, menu, ctx, LastUpdates))
+        self.add_item(BuildClearButton(menu, ctx, LastUpdates))
 
 def BuildMessage(ctx, UserRoles, menu, LastUpdates = None):
     """
@@ -167,7 +199,7 @@ async def CommandCallback(ctx):
     await ctx.respond(ephemeral=True, embed=embed, view=view)
 
 SETTINGS = None
-def register(bot, settings):
+def register(bot, settings, guilds = None):
     """
     Register commands based on the passed menus - see main.py for example
     """
@@ -175,7 +207,7 @@ def register(bot, settings):
     SETTINGS = settings
 
     for c in settings:
-        print(f"[roles] Registering /{c}")
+        print(f"[roles] Registering /{c}" + (f" on {len(guilds)} guilds" if guilds else " globally"))
 
         command = discord.SlashCommand(
                             CommandCallback,
