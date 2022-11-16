@@ -22,11 +22,12 @@ class Colors(commands.Cog):
 
         pattern = re.compile(f"{re.escape(self.prefix)}.*")
         ColorRoles = list(filter(lambda x: pattern.match(x.name), roles))
-        embed, view = self.GetColorEmbed(ctx, ColorRoles)
+
+        embed, view = self.BuildMessage(ctx, ColorRoles)
 
         await ctx.respond(ephemeral=True, embed=embed, view=view)
 
-    def GetColorEmbed(self, ctx, ColorRoles, LastUpdate = None):
+    def BuildMessage(self, ctx, ColorRoles, LastUpdate = None):
         RoleList = ""
         UserColor = ""
 
@@ -85,6 +86,6 @@ class Colors(commands.Cog):
                 print(f"[colors] Adding color to {interaction.user}")
                 await interaction.user.add_roles(role)
 
-            embed, view = self.cog.GetColorEmbed(self.ctx, self.colors, role)
+            embed, view = self.cog.BuildMessage(self.ctx, self.colors, role)
 
             await interaction.response.edit_message(embed=embed, view=view)

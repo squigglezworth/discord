@@ -11,7 +11,7 @@ settings = {
         "max_one": 0,
         # List of role IDs to exclude from the listing of the user's current roles
         # @everyone is automatically excluded
-        "exclude": [983269188036608050,637192413584293889],
+        "exclude": [983269188036608050, 637192413584293889],
         "dropdowns": [
             {
                 "placeholder": "EVE Online roles",
@@ -73,51 +73,52 @@ settings = {
                 "placeholder": "🦉 Animal Icons",
                 "randomize": 0,
                 "roles": [
-                    [1041543542423691336,"","🦑"],
-                    [1042254987855679568,"","<:blue_octopus2:1042254458882637876>"],
-                    [1042252793739739206,"","🐙"],
-                    [1041543751845290024,"","🐳"],
-                    [1041543812272623737,"","🦀"],
-                    [1041719288437944410,"","🦉"],
-                    [1041726074775687279,"","<:redpanda:1041725947243675729>"],
-                    [1041726257957703791,"","🐱"],
-                    [1041726321480454275,"","🐶"]
+                    [1041543542423691336, "", "🦑"],
+                    [1042254987855679568, "", "<:blue_octopus2:1042254458882637876>"],
+                    [1042252793739739206, "", "🐙"],
+                    [1041543751845290024, "", "🐳"],
+                    [1041543812272623737, "", "🦀"],
+                    [1041719288437944410, "", "🦉"],
+                    [1041726074775687279, "", "<:redpanda:1041725947243675729>"],
+                    [1041726257957703791, "", "🐱"],
+                    [1041726321480454275, "", "🐶"]
                 ]
             },
             {
                 "placeholder": "🏳️‍🌈 LGBT Icons",
                 "randomize": 0,
-                "roles":  [
-                    [1041321819984105512,"","<:LesbianPride:1007578778035290112>"],
-                    [1041321894927937646,"","<:GayPride:1007578774897954867>"],
-                    [1041321919984713848,"","<:BisexualPride:1007578776630198303>"],
-                    [1041321940998168627,"","🏳️‍⚧️"],
-                    [1041321961697071214,"","<:male_symbol:1041757493010894958>"],
-                    [1041322000469196850,"","<:female_symbol:1041757820900605972>"],
-                    [1041322026234822716,"","<:TransgenderSymbol:1007581443867815956>"],
-                    [1041322212982018059,"","<:AsexualPride:1007623033189568562>"],
-                    [1041322264815218688,"","<:AromanticPride:1007623034959581245>"],
+                "roles": [
+                    [1041321819984105512, "", "<:LesbianPride:1007578778035290112>"],
+                    [1041321894927937646, "", "<:GayPride:1007578774897954867>"],
+                    [1041321919984713848, "", "<:BisexualPride:1007578776630198303>"],
+                    [1041321940998168627, "", "🏳️‍⚧️"],
+                    [1041321961697071214, "", "<:male_symbol:1041757493010894958>"],
+                    [1041322000469196850, "", "<:female_symbol:1041757820900605972>"],
+                    [1041322026234822716, "", "<:TransgenderSymbol:1007581443867815956>"],
+                    [1041322212982018059, "", "<:AsexualPride:1007623033189568562>"],
+                    [1041322264815218688, "", "<:AromanticPride:1007623034959581245>"]
                 ]
             },
             {
                 "placeholder": "🥐 Misc. Icons",
                 "randomize": 0,
                 "roles": [
-                    [1041322728365506620,"","<:logo:875904386444967946>"],
-                    [1041322473783840888,"","<:corplogo:787272419127722004>"],
-                    [1041322146636513360,"","<:NeurodiversityPride:1037203581733974026>"],
-                    [1041322094543261716,"","<:freighter:1040091624715341865>"],
-                    [1041322195701481502,"","📚"],
-                    [1041335138434424942,"","🥐"],
-                    [1042121441891582002,"","💥"]
+                    [1041322728365506620, "", "<:logo:875904386444967946>"],
+                    [1041322473783840888, "", "<:corplogo:787272419127722004>"],
+                    [1041322146636513360, "", "<:NeurodiversityPride:1037203581733974026>"],
+                    [1041322094543261716, "", "<:freighter:1040091624715341865>"],
+                    [1041322195701481502, "", "📚"],
+                    [1041335138434424942, "", "🥐"],
+                    [1042121441891582002, "", "💥"]
                 ]
             }
         ]
     }
 }
 
+import discord, os, re
 from dotenv import load_dotenv
-import discord, os
+from discord.ext import commands
 
 import RoleMenus
 import memes
@@ -125,7 +126,11 @@ from cogs import colors
 
 load_dotenv()
 
-TOKEN = os.getenv("DEBUG_TOKEN") if os.getenv("DEBUG") == "True" else os.getenv("PROD_TOKEN")
+TOKEN = (
+    os.getenv("DEBUG_TOKEN")
+    if os.getenv("DEBUG") == "True"
+    else os.getenv("PROD_TOKEN")
+)
 GUILDS = [int(g) for g in os.getenv("GUILDS").split(",")] if os.getenv("GUILDS") else []
 
 
@@ -134,8 +139,51 @@ bot = discord.Bot(debug_guilds=GUILDS)
 RoleMenus.register(bot, settings, GUILDS)
 
 # Prefix your color roles with [C] (or change the prefix)
-bot.add_cog(colors.Colors(bot, "[C]", GUILDS))
+color_prefix = "[C]"
+bot.add_cog(colors.Colors(bot, color_prefix, GUILDS))
 bot.add_cog(memes.Memes(bot, GUILDS))
+
+class Button(discord.ui.Button):
+    def __init__(self, label, id, type):
+        global settings
+        self.settings = settings
+        super().__init__(label=label, style=type, custom_id=id)
+
+    async def callback(self, interaction):
+        UserRoles = interaction.user.roles
+
+        if self.custom_id in ["roles", "icons"]:
+            embed, view = RoleMenus.BuildMessage(interaction, UserRoles, self.settings[self.custom_id])
+        if self.custom_id == "colors":
+            roles = await interaction.guild.fetch_roles()
+
+            pattern = re.compile(f"{re.escape(color_prefix)}.*")
+            ColorRoles = list(filter(lambda x: pattern.match(x.name), roles))
+
+            cog = bot.get_cog("Colors")
+            embed, view = cog.BuildMessage(interaction, ColorRoles)
+
+        view.add_item(Button("🥐 Roles", "roles", discord.ButtonStyle.blurple))
+        view.add_item(Button("🌈 Change your color", "colors", discord.ButtonStyle.green))
+        view.add_item(Button("🚩 Select an icon", "icons", discord.ButtonStyle.blurple))
+
+        await interaction.response.edit_message(embed=embed, view=view)
+
+async def customize(ctx):
+    view = discord.ui.View()
+
+    view.add_item(Button("🥐 Roles", "roles", discord.ButtonStyle.blurple))
+    view.add_item(Button("🌈 Change your color", "colors", discord.ButtonStyle.green))
+    view.add_item(Button("🚩 Select an icon", "icons", discord.ButtonStyle.blurple))
+
+    embed = discord.Embed(color=0x299aff, description="*Use the buttons below to personalize your presence in the server. Give yourself roles to share things with other members. Add an icon that displays next to your name. Give yourself a fancy color. The possibilities are nearly endless!*")
+
+    await ctx.respond(ephemeral=True, embed=embed, view=view)
+
+command = discord.SlashCommand(customize, name="customize", description="Customize your presence in the server - change the color of your name, add an icon, and more!")
+
+bot.add_application_command(command)
+
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
