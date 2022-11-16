@@ -16,49 +16,48 @@ class Colors(commands.Cog):
         bot.add_application_command(command)
 
     async def CommandCallback(self, ctx):
-        print(f"[colors] Responding to {ctx.user}")
-
-        roles = await ctx.guild.fetch_roles()
-
-        pattern = re.compile(f"{re.escape(self.prefix)}.*")
-        ColorRoles = list(filter(lambda x: pattern.match(x.name), roles))
-
-        embed, view = self.BuildMessage(ctx, ColorRoles)
+        embed, view = self.BuildMessage(ctx)
 
         await ctx.respond(ephemeral=True, embed=embed, view=view)
 
-    def BuildMessage(self, ctx, ColorRoles, LastUpdate = None):
+    def BuildMessage(self, ctx, LastUpdate = None, ExtraViews = None):
         RoleList = ""
         UserColor = ""
 
-        for r in ctx.user.roles:
-            pattern = re.compile("\[C\].*")
-            if pattern.match(r.name):
-                UserColor = f"<@&{r.id}>"
-            if LastUpdate:
-                UserColor = f"<@&{LastUpdate.id}>"
-
+        # Retrieve a list of all color roles
+        roles = ctx.guild.roles
+        pattern = re.compile(f"{re.escape(self.prefix)}.*")
+        ColorRoles = list(filter(lambda x: pattern.match(x.name), roles))
         random.shuffle(ColorRoles)
 
         for r in ColorRoles:
             RoleList += f"<@&{r.id}>  "
 
-        view = self.ColorView(ctx, ColorRoles, self)
+        if LastUpdate:
+            UserColor = f"<@&{LastUpdate[1].id}>" if LastUpdate[0] == 1 else f"empty!"
+        else:
+            for r in ctx.user.roles:
+                pattern = re.compile("\[C\].*")
+                if pattern.match(r.name):
+                    UserColor = f"<@&{r.id}>"
+
+        view = self.ColorView(ctx, self, ColorRoles, ExtraViews)
         embed = discord.Embed(color=0x299aff, description=f"*Hello <@{ctx.user.id}>, your current color is {UserColor}\n\nAvailable colors are: {RoleList}*")
 
         return embed, view
 
     class ColorView(discord.ui.View):
-        def __init__(self, ctx, colors, cog):
+        def __init__(self, ctx, cog, ColorRoles, ExtraViews):
             super().__init__()
 
-            self.add_item(cog.ColorDropdown(ctx, colors, cog))
+            self.add_item(cog.ColorDropdown(ctx, ColorRoles, cog, ExtraViews))
 
     class ColorDropdown(discord.ui.Select):
-        def __init__(self, ctx, ColorRoles, cog):
+        def __init__(self, ctx, ColorRoles, cog, ExtraViews = None):
             self.ctx = ctx
             self.colors = ColorRoles
             self.cog = cog
+            self.ExtraViews = ExtraViews
             options = []
 
             for r in ColorRoles:
@@ -80,12 +79,23 @@ class Colors(commands.Cog):
                 if pattern.match(r.name):
                     print(f"[colors] Removing color from {interaction.user}")
                     await interaction.user.remove_roles(r)
+                    LastUpdate = [0,r]
 
             for r in self.values:
                 role = interaction.guild.get_role(int(r))
-                print(f"[colors] Adding color to {interaction.user}")
-                await interaction.user.add_roles(role)
+                if role in interaction.user.roles:
+                    print(f"[colors] Removing color from {interaction.user}")
+                    await interaction.user.remove_roles(role)
+                    LastUpdate = [0,role]
+                else:
+                    print(f"[colors] Adding color to {interaction.user}")
+                    await interaction.user.add_roles(role)
+                    LastUpdate = [1,role]
 
-            embed, view = self.cog.BuildMessage(self.ctx, self.colors, role)
+            embed, view = self.cog.BuildMessage(self.ctx, LastUpdate, ExtraViews=self.ExtraViews)
+
+            if self.ExtraViews:
+                for v in self.ExtraViews:
+                    view.add_item(v)
 
             await interaction.response.edit_message(embed=embed, view=view)

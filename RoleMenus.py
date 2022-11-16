@@ -2,12 +2,13 @@ import discord, re, random
 from random import shuffle
 from discord.ext import commands
 
-class BuildDropdown(discord.ui.Select):
-    def __init__(self, dropdown, settings, ctx, LastUpdates = None):
+class Dropdown(discord.ui.Select):
+    def __init__(self, dropdown, settings, ctx, LastUpdates = None, ExtraViews = None):
         options = []
         self.dropdown = dropdown
         self.settings = settings
         self.ctx = ctx
+        self.ExtraViews = ExtraViews
 
         if dropdown["randomize"]:
             shuffle(dropdown["roles"])
@@ -104,16 +105,22 @@ class BuildDropdown(discord.ui.Select):
         # Retrieve the message embed & view
         # The embed contains some message, usually a list of the user's roles
         # The view contains the dropdown menus
-        embed, view = BuildMessage(self.ctx, UserRoles, self.settings, LastUpdates)
+        embed, view = Message(self.ctx, self.settings, UserRoles, LastUpdates, ExtraViews=self.ExtraViews)
+
+        # Add any extra views (i.e., buttons) passed through
+        if self.ExtraViews:
+            for v in self.ExtraViews:
+                view.add_item(v)
 
         # Update the existing message with the embed & view
         await interaction.response.edit_message(embed=embed, view=view)
 
-class BuildClearButton(discord.ui.Button):
-    def __init__(self, settings, ctx, LastUpdates = None):
+class ClearButton(discord.ui.Button):
+    def __init__(self, settings, ctx, LastUpdates = None, ExtraViews = None):
         self.ctx = ctx
         self.settings = settings
         self.LastUpdates = LastUpdates
+        self.ExtraViews = ExtraViews
 
         super().__init__(label="Clear all roles",
                          style=discord.ButtonStyle.danger)
@@ -137,27 +144,34 @@ class BuildClearButton(discord.ui.Button):
         await interaction.user.edit(roles=UserRoles)
 
         # Update the message
-        embed, view = BuildMessage(self.ctx, UserRoles, self.settings, LastUpdates)
+        embed, view = Message(self.ctx, self.settings, UserRoles, LastUpdates, self.ExtraViews)
+
+        for v in self.ExtraViews:
+            view.add_item(v)
+
         await interaction.response.edit_message(embed=embed, view=view)
 
-class BuildView(discord.ui.View):
+class View(discord.ui.View):
     """
     Assemble the dropdowns for a given menu into a View
     """
-    def __init__(self, menu, ctx, LastUpdates = None):
+    def __init__(self, menu, ctx, LastUpdates = None, ExtraViews = None):
         super().__init__()
 
         for dropdown in menu["dropdowns"]:
-            self.add_item(BuildDropdown(dropdown, menu, ctx, LastUpdates))
-        self.add_item(BuildClearButton(menu, ctx, LastUpdates))
+            self.add_item(Dropdown(dropdown, menu, ctx, LastUpdates, ExtraViews))
 
-def BuildMessage(ctx, UserRoles, menu, LastUpdates = None):
+        self.add_item(ClearButton(menu, ctx, LastUpdates, ExtraViews))
+
+def Message(ctx, menu, UserRoles = None, LastUpdates = None, ExtraViews = None):
     """
     Builds & returns the message (embed & view) to /commands and interactions
     """
     MenuRoles = []
     RolesList = ""
     ShortRolesList = ""
+    if not UserRoles:
+        UserRoles = ctx.user.roles
 
     # Assemble a list of all roles for this menu
     for m in menu["dropdowns"]:
@@ -175,7 +189,7 @@ def BuildMessage(ctx, UserRoles, menu, LastUpdates = None):
 
     # Prepare the View
     # If the user has selected a role, pass it along (LastUpdate)
-    view = BuildView(menu, ctx, LastUpdates)
+    view = View(menu, ctx, LastUpdates, ExtraViews)
 
     # Prepare the embed
     data = {
@@ -193,8 +207,7 @@ async def CommandCallback(ctx):
     global SETTINGS
 
     # Prepare the embed & view for the initial response, passing the user's roles at the time of calling
-    UserRoles = ctx.user.roles
-    embed, view = BuildMessage(ctx, UserRoles, SETTINGS[str(ctx.command)])
+    embed, view = Message(ctx, SETTINGS[str(ctx.command)])
 
     await ctx.respond(ephemeral=True, embed=embed, view=view)
 

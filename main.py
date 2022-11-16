@@ -1,7 +1,7 @@
 # settings = {
 # }
 
-settings = {
+role_settings = {
     "roles": {
         "name": "roles",
         "description": "Add/remove various roles from yourself. Tag them to share links, chat with others, etc",
@@ -126,66 +126,76 @@ from cogs import colors
 
 load_dotenv()
 
-TOKEN = (
-    os.getenv("DEBUG_TOKEN")
-    if os.getenv("DEBUG") == "True"
-    else os.getenv("PROD_TOKEN")
-)
+TOKEN = (os.getenv("DEBUG_TOKEN") if os.getenv("DEBUG") == "True" else os.getenv("PROD_TOKEN"))
 GUILDS = [int(g) for g in os.getenv("GUILDS").split(",")] if os.getenv("GUILDS") else []
 
 
 bot = discord.Bot(debug_guilds=GUILDS)
 
-RoleMenus.register(bot, settings, GUILDS)
+RoleMenus.register(bot, role_settings, GUILDS)
 
 # Prefix your color roles with [C] (or change the prefix)
 color_prefix = "[C]"
 bot.add_cog(colors.Colors(bot, color_prefix, GUILDS))
+
 bot.add_cog(memes.Memes(bot, GUILDS))
 
 class Button(discord.ui.Button):
-    def __init__(self, label, id, type):
-        global settings
-        self.settings = settings
-        super().__init__(label=label, style=type, custom_id=id)
+    def __init__(self, ctx, options, buttons = None):
+        self.ctx =  ctx
+        self.buttons = buttons
+        global role_settings
+        self.role_settings = role_settings
+
+        super().__init__(label=options[0], style=options[2], custom_id=options[1])
 
     async def callback(self, interaction):
-        UserRoles = interaction.user.roles
+        """
+        Callback for /customize buttons
+        """
+        buttons = [Button(self.ctx, b, self.buttons) for b in self.buttons]
 
         if self.custom_id in ["roles", "icons"]:
-            embed, view = RoleMenus.BuildMessage(interaction, UserRoles, self.settings[self.custom_id])
+            embed, view = RoleMenus.Message(self.ctx, self.role_settings[self.custom_id], ExtraViews=buttons)
         if self.custom_id == "colors":
-            roles = await interaction.guild.fetch_roles()
-
-            pattern = re.compile(f"{re.escape(color_prefix)}.*")
-            ColorRoles = list(filter(lambda x: pattern.match(x.name), roles))
-
             cog = bot.get_cog("Colors")
-            embed, view = cog.BuildMessage(interaction, ColorRoles)
+            embed, view = cog.BuildMessage(interaction, ExtraViews=buttons)
 
-        view.add_item(Button("🥐 Roles", "roles", discord.ButtonStyle.blurple))
-        view.add_item(Button("🌈 Change your color", "colors", discord.ButtonStyle.green))
-        view.add_item(Button("🚩 Select an icon", "icons", discord.ButtonStyle.blurple))
+        for b in buttons:
+            view.add_item(b)
 
         await interaction.response.edit_message(embed=embed, view=view)
 
 async def customize(ctx):
+    """
+    Callback for /customize command
+    """
+    buttons = [
+        ["🥐 Roles", "roles", discord.ButtonStyle.blurple],
+        ["🌈 Change your color", "colors", discord.ButtonStyle.green],
+        ["🚩 Select an icon", "icons", discord.ButtonStyle.blurple]
+    ]
+
     view = discord.ui.View()
 
-    view.add_item(Button("🥐 Roles", "roles", discord.ButtonStyle.blurple))
-    view.add_item(Button("🌈 Change your color", "colors", discord.ButtonStyle.green))
-    view.add_item(Button("🚩 Select an icon", "icons", discord.ButtonStyle.blurple))
+    for b in buttons:
+        view.add_item(Button(ctx, b, buttons))
 
     embed = discord.Embed(color=0x299aff, description="*Use the buttons below to personalize your presence in the server. Give yourself roles to share things with other members. Add an icon that displays next to your name. Give yourself a fancy color. The possibilities are nearly endless!*")
 
     await ctx.respond(ephemeral=True, embed=embed, view=view)
 
-command = discord.SlashCommand(customize, name="customize", description="Customize your presence in the server - change the color of your name, add an icon, and more!")
-
+command = discord.SlashCommand(customize, description="Personalize your presence in the server - change the color of your name, add an icon, and more!")
 bot.add_application_command(command)
+
+
+@bot.event
+async def on_application_command(ctx):
+    print(f"[{ctx.command}] Responding to {ctx.user}")
 
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
+
 
 bot.run(TOKEN)
