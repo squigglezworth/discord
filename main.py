@@ -121,8 +121,7 @@ from dotenv import load_dotenv
 from discord.ext import commands
 
 import RoleMenus
-import memes
-from cogs import colors
+from cogs import colors, memes
 
 load_dotenv()
 
@@ -185,6 +184,7 @@ async def customize(ctx):
 
     await ctx.respond(ephemeral=True, embed=embed, view=view)
 
+print(f"[customize] Registering /customize" + (f" on {len(GUILDS)} guilds" if GUILDS else " globally"))
 command = discord.SlashCommand(customize, description="Personalize your presence in the server - change the color of your name, add an icon, and more!")
 bot.add_application_command(command)
 
