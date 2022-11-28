@@ -16,11 +16,11 @@ class Colors(commands.Cog):
         bot.add_application_command(command)
 
     async def CommandCallback(self, ctx):
-        embed, view = self.BuildMessage(ctx)
+        embed, view = self.Message(ctx)
 
         await ctx.respond(ephemeral=True, embed=embed, view=view)
 
-    def BuildMessage(self, ctx, LastUpdate = None, ExtraViews = None):
+    def Message(self, ctx, LastUpdate = None, ExtraViews = None):
         RoleList = ""
         UserColor = ""
 
@@ -41,18 +41,18 @@ class Colors(commands.Cog):
                 if pattern.match(r.name):
                     UserColor = f"<@&{r.id}>"
 
-        view = self.ColorView(ctx, self, ColorRoles, ExtraViews)
+        view = self.View(ctx, self, ColorRoles, ExtraViews)
         embed = discord.Embed(color=0x299aff, description=f"*Hello <@{ctx.user.id}>, your current color is {UserColor}\n\nAvailable colors are: {RoleList}*")
 
         return embed, view
 
-    class ColorView(discord.ui.View):
+    class View(discord.ui.View):
         def __init__(self, ctx, cog, ColorRoles, ExtraViews):
             super().__init__()
 
-            self.add_item(cog.ColorDropdown(ctx, ColorRoles, cog, ExtraViews))
+            self.add_item(cog.Dropdown(ctx, ColorRoles, cog, ExtraViews))
 
-    class ColorDropdown(discord.ui.Select):
+    class Dropdown(discord.ui.Select):
         def __init__(self, ctx, ColorRoles, cog, ExtraViews = None):
             self.ctx = ctx
             self.colors = ColorRoles
@@ -78,21 +78,25 @@ class Colors(commands.Cog):
             for r in interaction.user.roles:
                 if pattern.match(r.name):
                     print(f"[colors] Removing color from {interaction.user}")
+
                     await interaction.user.remove_roles(r)
-                    LastUpdate = [0,r]
+                    LastUpdate = [0, r]
 
             for r in self.values:
                 role = interaction.guild.get_role(int(r))
+
                 if role in interaction.user.roles:
                     print(f"[colors] Removing color from {interaction.user}")
+
                     await interaction.user.remove_roles(role)
-                    LastUpdate = [0,role]
+                    LastUpdate = [0, role]
                 else:
                     print(f"[colors] Adding color to {interaction.user}")
-                    await interaction.user.add_roles(role)
-                    LastUpdate = [1,role]
 
-            embed, view = self.cog.BuildMessage(self.ctx, LastUpdate, ExtraViews=self.ExtraViews)
+                    await interaction.user.add_roles(role)
+                    LastUpdate = [1, role]
+
+            embed, view = self.cog.Message(self.ctx, LastUpdate, ExtraViews=self.ExtraViews)
 
             if self.ExtraViews:
                 for v in self.ExtraViews:
