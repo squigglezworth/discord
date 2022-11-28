@@ -1,20 +1,19 @@
-import discord, re
+import discord, re, logging
 from discord.ext import commands
 from imdb import Cinemagoer, IMDbError
 from retry import retry
 
+logger = logging.getLogger("bot.imdb")
+
 
 @retry(tries=5)
 def search_movie(search):
-    print(f"[imdb] Searching for {search}...")
     imdb = Cinemagoer()
     results = imdb.search_movie(search)
 
     if not len(results):
-        print(f"[imdb] Failed to find :(")
         raise IMDbError
     else:
-        print(f"[imdb] Found!")
         return results
 
 
@@ -27,8 +26,8 @@ def update_movie(result):
 
 class Imdb(commands.Cog):
     def __init__(self, bot, guilds=None):
-        print(
-            f"[imdb] Registering /imdb"
+        logger.info(
+            f"Registering /imdb"
             + (f" on {len(guilds)} guilds" if guilds else " globally")
         )
 
@@ -48,8 +47,6 @@ class Imdb(commands.Cog):
         )
 
     async def CommandCallback(self, ctx, search: str):
-        print(f"[imdb] Responding to {ctx.user}")
-
         imdb = Cinemagoer()
 
         if re.match("^\d+$", search.lstrip("tt")):

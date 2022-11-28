@@ -1,9 +1,12 @@
-import discord, re, random
+import discord, re, random, logging
 from random import shuffle
 from discord.ext import commands
 
+logger = logging.getLogger("bot.roles")
+
+
 class Dropdown(discord.ui.Select):
-    def __init__(self, dropdown, settings, ctx, LastUpdates = None, ExtraViews = None):
+    def __init__(self, dropdown, settings, ctx, LastUpdates=None, ExtraViews=None):
         options = []
         self.dropdown = dropdown
         self.settings = settings
@@ -25,18 +28,16 @@ class Dropdown(discord.ui.Select):
             # When a user already has this role - or when the user added it last time - change the description accordingly
             # if role in ctx.user.roles or (LastUpdate and LastUpdate[0] == 1 and role is LastUpdate[1]):
             if role in ctx.user.roles or update == 1:
-                description="You already have this role. Click to remove it"
+                description = "You already have this role. Click to remove it"
             # If the user removed the role last time - and it is thus available again - reset the description
             # if LastUpdate and LastUpdate[0] == 0 and role is LastUpdate[1]:
             if update == 0:
-                description=r[1]
+                description = r[1]
             # The above checks are necessary due to an outdated user instance - unsure how to retrieve an updated one
 
             # Add each role to the list of options
             option = discord.SelectOption(
-                label=role.name,
-                description=description,
-                value=str(role.id)
+                label=role.name, description=description, value=str(role.id)
             )
             # Add the emoji provided during setup
             if r[2]:
@@ -45,9 +46,9 @@ class Dropdown(discord.ui.Select):
 
         # Assemble & return the dropdown menu
         super().__init__(
-                placeholder=dropdown["placeholder"],
-                options=options,
-                min_values=1,
+            placeholder=dropdown["placeholder"],
+            options=options,
+            min_values=1,
         )
 
     async def callback(self, interaction: discord.Interaction):
@@ -61,7 +62,9 @@ class Dropdown(discord.ui.Select):
             role = interaction.guild.get_role(int(r))
             # Remove it if they already have it
             if role in interaction.user.roles:
-                print(f"[roles - {self.ctx.command}] Removing roles from {interaction.user}")
+                logger.info(
+                    f"[{self.ctx.command}] Removing roles from {interaction.user}"
+                )
 
                 # Prepare info for updating the message
                 # deleted, role
@@ -73,7 +76,9 @@ class Dropdown(discord.ui.Select):
             else:
                 # If specified, only allow 1 role from this menu
                 if self.settings["max_one"]:
-                    print(f"[roles - {self.ctx.command}] max_one specified; removing all roles")
+                    logger.info(
+                        f"[{self.ctx.command}] max_one specified; removing all roles"
+                    )
 
                     MenuRoles = []
                     # Assemble a list of all roles for this menu
@@ -82,16 +87,23 @@ class Dropdown(discord.ui.Select):
                             MenuRoles += [r[0]]
 
                     # Add all the roles we're about to remove to the LastUpdates array
-                    for f in filter(lambda r: r.id in [r for r in MenuRoles], interaction.user.roles):
-                        LastUpdates.append([0,f])
+                    for f in filter(
+                        lambda r: r.id in [r for r in MenuRoles], interaction.user.roles
+                    ):
+                        LastUpdates.append([0, f])
 
                     # Filter out the roles in this menu from the user's roles
-                    UserRoles = list(filter(lambda r: r.id not in [r for r in MenuRoles], interaction.user.roles))
+                    UserRoles = list(
+                        filter(
+                            lambda r: r.id not in [r for r in MenuRoles],
+                            interaction.user.roles,
+                        )
+                    )
 
                     # Update the user's roles
                     await interaction.user.edit(roles=UserRoles)
 
-                print(f"[roles - {self.ctx.command}] Adding roles to {interaction.user}")
+                logger.info(f"[{self.ctx.command}] Adding roles to {interaction.user}")
 
                 # Prepare info for updating the message
                 # added, role
@@ -105,7 +117,9 @@ class Dropdown(discord.ui.Select):
         # Retrieve the message embed & view
         # The embed contains some message, usually a list of the user's roles
         # The view contains the dropdown menus
-        embed, view = Message(self.ctx, self.settings, UserRoles, LastUpdates, ExtraViews=self.ExtraViews)
+        embed, view = Message(
+            self.ctx, self.settings, UserRoles, LastUpdates, ExtraViews=self.ExtraViews
+        )
 
         # Add any extra views (i.e., buttons) passed through
         if self.ExtraViews:
@@ -115,18 +129,18 @@ class Dropdown(discord.ui.Select):
         # Update the existing message with the embed & view
         await interaction.response.edit_message(embed=embed, view=view)
 
+
 class ClearButton(discord.ui.Button):
-    def __init__(self, settings, ctx, LastUpdates = None, ExtraViews = None):
+    def __init__(self, settings, ctx, LastUpdates=None, ExtraViews=None):
         self.ctx = ctx
         self.settings = settings
         self.LastUpdates = LastUpdates
         self.ExtraViews = ExtraViews
 
-        super().__init__(label="Clear all roles",
-                         style=discord.ButtonStyle.danger)
+        super().__init__(label="Clear all roles", style=discord.ButtonStyle.danger)
 
     async def callback(self, interaction):
-        print(f"[roles - {self.ctx.command}] {interaction.user} selected 'Clear all'")
+        logger.info(f"[{self.ctx.command}] {interaction.user} selected 'Clear all'")
 
         # Build a list of all roles in this menu
         MenuRoles = []
@@ -136,26 +150,34 @@ class ClearButton(discord.ui.Button):
 
         # Add all the roles we're about to remove to the LastUpdates array
         LastUpdates = []
-        for f in filter(lambda r: r.id in [r for r in MenuRoles], interaction.user.roles):
-            LastUpdates.append([0,f])
+        for f in filter(
+            lambda r: r.id in [r for r in MenuRoles], interaction.user.roles
+        ):
+            LastUpdates.append([0, f])
 
         # Remove them from the user's roles and update the user
-        UserRoles = list(filter(lambda r: r.id not in [r for r in MenuRoles], interaction.user.roles))
+        UserRoles = list(
+            filter(lambda r: r.id not in [r for r in MenuRoles], interaction.user.roles)
+        )
         await interaction.user.edit(roles=UserRoles)
 
         # Update the message
-        embed, view = Message(self.ctx, self.settings, UserRoles, LastUpdates, self.ExtraViews)
+        embed, view = Message(
+            self.ctx, self.settings, UserRoles, LastUpdates, self.ExtraViews
+        )
 
         for v in self.ExtraViews:
             view.add_item(v)
 
         await interaction.response.edit_message(embed=embed, view=view)
 
+
 class View(discord.ui.View):
     """
     Assemble the dropdowns for a given menu into a View
     """
-    def __init__(self, menu, ctx, LastUpdates = None, ExtraViews = None):
+
+    def __init__(self, menu, ctx, LastUpdates=None, ExtraViews=None):
         super().__init__()
 
         for dropdown in menu["dropdowns"]:
@@ -163,7 +185,8 @@ class View(discord.ui.View):
 
         self.add_item(ClearButton(menu, ctx, LastUpdates, ExtraViews))
 
-def Message(ctx, menu, UserRoles = None, LastUpdates = None, ExtraViews = None):
+
+def Message(ctx, menu, UserRoles=None, LastUpdates=None, ExtraViews=None):
     """
     Builds & returns the message (embed & view) to /commands and interactions
     """
@@ -192,17 +215,14 @@ def Message(ctx, menu, UserRoles = None, LastUpdates = None, ExtraViews = None):
     view = View(menu, ctx, LastUpdates, ExtraViews)
 
     # Prepare the embed
-    data = {
-        "ctx": ctx,
-        "RolesList": RolesList,
-        "ShortRolesList": ShortRolesList
-    }
-    embed = discord.Embed(color=0x299aff, description=menu["embed"].format(**data))
+    data = {"ctx": ctx, "RolesList": RolesList, "ShortRolesList": ShortRolesList}
+    embed = discord.Embed(color=0x299AFF, description=menu["embed"].format(**data))
 
     return embed, view
 
+
 async def CommandCallback(ctx):
-    print(f"[roles - {ctx.command}] Responding to {ctx.user}")
+    logger.info(f"[{ctx.command}] Responding to {ctx.user}")
 
     global SETTINGS
 
@@ -211,8 +231,11 @@ async def CommandCallback(ctx):
 
     await ctx.respond(ephemeral=True, embed=embed, view=view)
 
+
 SETTINGS = None
-def register(bot, settings, guilds = None):
+
+
+def register(bot, settings, guilds=None):
     """
     Register commands based on the passed menus - see main.py for example
     """
@@ -220,12 +243,16 @@ def register(bot, settings, guilds = None):
     SETTINGS = settings
 
     for c in settings:
-        print(f"[roles] Registering /{c}" + (f" on {len(guilds)} guilds" if guilds else " globally"))
+        logger.info(
+            f"Registering /{c}"
+            + (f" on {len(guilds)} guilds" if guilds else " globally")
+        )
 
         command = discord.SlashCommand(
-                            CommandCallback,
-                            callback=CommandCallback,
-                            name=c,
-                            description=settings[c]["description"])
+            CommandCallback,
+            callback=CommandCallback,
+            name=c,
+            description=settings[c]["description"],
+        )
 
         bot.add_application_command(command)

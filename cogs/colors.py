@@ -1,17 +1,24 @@
-import discord, re, random
+import discord, re, random, logging
 from discord.ext import commands
 
+logger = logging.getLogger("bot.colors")
+
+
 class Colors(commands.Cog):
-    def __init__(self, bot, prefix, guilds = None):
+    def __init__(self, bot, prefix, guilds=None):
         self.bot = bot
         self.prefix = prefix
 
-        print(f"[colors] Registering /colors" + (f" on {len(guilds)} guilds" if guilds else " globally"))
+        logger.info(
+            f"Registering /colors"
+            + (f" on {len(guilds)} guilds" if guilds else " globally")
+        )
 
         command = discord.SlashCommand(
-                            self.CommandCallback,
-                            name="colors",
-                            description="Give your messages a bit of flair with a fancy color role!")
+            self.CommandCallback,
+            name="colors",
+            description="Give your messages a bit of flair with a fancy color role!",
+        )
 
         bot.add_application_command(command)
 
@@ -20,7 +27,7 @@ class Colors(commands.Cog):
 
         await ctx.respond(ephemeral=True, embed=embed, view=view)
 
-    def Message(self, ctx, LastUpdate = None, ExtraViews = None):
+    def Message(self, ctx, LastUpdate=None, ExtraViews=None):
         RoleList = ""
         UserColor = ""
 
@@ -42,7 +49,10 @@ class Colors(commands.Cog):
                     UserColor = f"<@&{r.id}>"
 
         view = self.View(ctx, self, ColorRoles, ExtraViews)
-        embed = discord.Embed(color=0x299aff, description=f"*Hello <@{ctx.user.id}>, your current color is {UserColor}\n\nAvailable colors are: {RoleList}*")
+        embed = discord.Embed(
+            color=0x299AFF,
+            description=f"*Hello <@{ctx.user.id}>, your current color is {UserColor}\n\nAvailable colors are: {RoleList}*",
+        )
 
         return embed, view
 
@@ -53,7 +63,7 @@ class Colors(commands.Cog):
             self.add_item(cog.Dropdown(ctx, ColorRoles, cog, ExtraViews))
 
     class Dropdown(discord.ui.Select):
-        def __init__(self, ctx, ColorRoles, cog, ExtraViews = None):
+        def __init__(self, ctx, ColorRoles, cog, ExtraViews=None):
             self.ctx = ctx
             self.colors = ColorRoles
             self.cog = cog
@@ -61,15 +71,16 @@ class Colors(commands.Cog):
             options = []
 
             for r in ColorRoles:
-                options += [discord.SelectOption(
-                    label = r.name.removeprefix(cog.prefix),
-                    value = str(r.id)
-                )]
+                options += [
+                    discord.SelectOption(
+                        label=r.name.removeprefix(cog.prefix), value=str(r.id)
+                    )
+                ]
 
             super().__init__(
-                    placeholder="🌈 Select a color!",
-                    options=options,
-                    min_values=1,
+                placeholder="🌈 Select a color!",
+                options=options,
+                min_values=1,
             )
 
         async def callback(self, interaction: discord.Interaction):
@@ -77,7 +88,7 @@ class Colors(commands.Cog):
 
             for r in interaction.user.roles:
                 if pattern.match(r.name):
-                    print(f"[colors] Removing color from {interaction.user}")
+                    logger.info(f"Removing color from {interaction.user}")
 
                     await interaction.user.remove_roles(r)
                     LastUpdate = [0, r]
@@ -86,17 +97,19 @@ class Colors(commands.Cog):
                 role = interaction.guild.get_role(int(r))
 
                 if role in interaction.user.roles:
-                    print(f"[colors] Removing color from {interaction.user}")
+                    logger.info(f"Removing color from {interaction.user}")
 
                     await interaction.user.remove_roles(role)
                     LastUpdate = [0, role]
                 else:
-                    print(f"[colors] Adding color to {interaction.user}")
+                    logger.info(f"Adding color to {interaction.user}")
 
                     await interaction.user.add_roles(role)
                     LastUpdate = [1, role]
 
-            embed, view = self.cog.Message(self.ctx, LastUpdate, ExtraViews=self.ExtraViews)
+            embed, view = self.cog.Message(
+                self.ctx, LastUpdate, ExtraViews=self.ExtraViews
+            )
 
             if self.ExtraViews:
                 for v in self.ExtraViews:

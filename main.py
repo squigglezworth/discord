@@ -116,12 +116,25 @@ role_settings = {
     }
 }
 
-import discord, os, re
+import discord, os, re, logging
 from dotenv import load_dotenv
 from discord.ext import commands
 
 import RoleMenus
-from cogs import colors, memes
+from cogs import colors, memes, imdb
+
+# Setup logging formatter & stream handler
+formatter = logging.Formatter(f"%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter.default_msec_format = None
+ch = logging.StreamHandler()
+ch.setFormatter(formatter)
+# Attach handlers to loggers and set logging level
+logger = logging.getLogger("discord")
+logger.addHandler(ch)
+logger.setLevel(logging.WARNING)
+logger = logging.getLogger("bot")
+logger.addHandler(ch)
+logger.setLevel(logging.INFO)
 
 load_dotenv()
 
@@ -138,6 +151,7 @@ color_prefix = "[C]"
 bot.add_cog(colors.Colors(bot, color_prefix, GUILDS))
 
 bot.add_cog(memes.Memes(bot, GUILDS))
+bot.add_cog(imdb.Imdb(bot, GUILDS))
 
 class Button(discord.ui.Button):
     def __init__(self, ctx, options, buttons = None):
@@ -158,7 +172,7 @@ class Button(discord.ui.Button):
             embed, view = RoleMenus.Message(self.ctx, self.role_settings[self.custom_id], ExtraViews=buttons)
         if self.custom_id == "colors":
             cog = bot.get_cog("Colors")
-            embed, view = cog.BuildMessage(interaction, ExtraViews=buttons)
+            embed, view = cog.Message(interaction, ExtraViews=buttons)
 
         for b in buttons:
             view.add_item(b)
@@ -184,18 +198,19 @@ async def customize(ctx):
 
     await ctx.respond(ephemeral=True, embed=embed, view=view)
 
-print(f"[customize] Registering /customize" + (f" on {len(GUILDS)} guilds" if GUILDS else " globally"))
+logger.info(f"Registering /customize" + (f" on {len(GUILDS)} guilds" if GUILDS else " globally"))
 command = discord.SlashCommand(customize, description="Personalize your presence in the server - change the color of your name, add an icon, and more!")
 bot.add_application_command(command)
 
 
 @bot.event
 async def on_application_command(ctx):
-    print(f"[{ctx.command}] Responding to {ctx.user}")
+    logger = logging.getLogger(f"bot.{ctx.command}")
+    logger.info(f"Responding to {ctx.user}")
 
 @bot.event
 async def on_ready():
-    print(f"Logged in as {bot.user}")
+    logger.info(f"Logged in as {bot.user}")
 
 
 bot.run(TOKEN)
