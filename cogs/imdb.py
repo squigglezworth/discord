@@ -4,24 +4,26 @@ from imdb import Cinemagoer, IMDbError
 from retry import retry
 
 logger = logging.getLogger("bot.imdb")
-
+imdb = Cinemagoer()
 
 @retry(tries=5)
 def search_movie(search):
-    imdb = Cinemagoer()
+    logger.info(f"Searching for {search} ...")
+
     results = imdb.search_movie(search)
 
     if not len(results):
         raise IMDbError
     else:
+        logger.info("Done!")
         return results
 
 
-def update_movie(result):
-    info = ["main", "plot"]
-    imdb = Cinemagoer()
+def update_movie(result, info=["main"]):
+    logger.info(f"Updating info for {result} ...")
 
-    return imdb.update(result, info)
+    imdb.update(result, info)
+    logger.info(f"Done!")
 
 
 class Imdb(commands.Cog):
@@ -44,8 +46,6 @@ class Imdb(commands.Cog):
         )
 
     async def CommandCallback(self, ctx, search: str):
-        imdb = Cinemagoer()
-
         if re.match("^\d+$", search.lstrip("tt")):
             await ctx.interaction.response.defer(ephemeral=False)
 
@@ -70,12 +70,25 @@ class Imdb(commands.Cog):
         results = self.results
 
         if len(results) > 1:
+            logger.info("Search found; letting user choose")
             view = View(cog, ctx, results)
             embed.description = "Select a movie to send in the current channel:\n"
 
             for i in range(0, 5):
-                url = f"https://imdb.com/title/tt{self.results[i].movieID}"
-                embed.description += f"{i+1}) ***[{self.results[i]}]({url})*** ({self.results[i].get('year')})\n"
+                logger.info(f"Building embed for movie #{i}")
+                result = results[i]
+                update_movie(result)
+
+                url = f"https://imdb.com/title/tt{result.movieID}"
+                embed.description += f"{i+1}) ***[{result}]({url})*** ({result['year']})"
+
+                if "creator" in result:
+                    embed.description += f" - *Created by: {result['creator'][0]['name']}*"
+                elif "director" in result:
+                    embed.description += f" - *Directed by: {result['director'][0]['name']}*"
+
+                embed.description += "\n"
+
         elif len(results) == 1:
             result = results[0]
             update_movie(result)
@@ -111,10 +124,11 @@ class Imdb(commands.Cog):
                 for c in result["cast"][:n]:
                     cast += [f"[{c['name']}](https://imdb.com/name/nm{c.personID})"]
                 embed.description += f"*Starring: {', '.join(cast)}*"
-        else:
-            embed.description = "Uh oh, something went wrong! Please let <@267869612383666177> know!"
 
-        embed.set_footer(text="Use /imdb to lookup TV/movies", icon_url="https://cdn.discordapp.com/attachments/525755278172356625/1046961975416066118/image.png")
+            embed.set_footer(text="Use /imdb to lookup TV/movies", icon_url="https://cdn.discordapp.com/attachments/525755278172356625/1046961975416066118/image.png")
+        else:
+            embed.description = "Uh oh, something went wrong! Please let your admin know!"
+
         return embed, view
 
 
@@ -143,7 +157,6 @@ class Button(discord.ui.Button):
         Callback for buttons
         """
 
-        imdb = Cinemagoer()
         result = imdb.get_movie(self.custom_id)
         self.cog.results = [result]
 
