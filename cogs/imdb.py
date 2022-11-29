@@ -6,13 +6,12 @@ from retry import retry
 logger = logging.getLogger("bot.imdb")
 
 @retry(tries=5)
-def search_movie(search, db):
-    logger.info(f"Searching for {search} ...")
-
+def search_movie(search, db=None):
     if db:
-        print(f"using db {db}")
-        imdb = Cinemagoer('s3', 'sqlite:///imdb.sqlite')
+        logger.info(f"Searching for {search} using sqlite ...")
+        imdb = Cinemagoer('s3', db)
     else:
+        logger.info(f"Searching for {search} ...")
         imdb = Cinemagoer()
 
     results = imdb.search_movie(search, results=5)
@@ -26,7 +25,7 @@ def search_movie(search, db):
 @retry(tries=5)
 def update_movie(result, db=None):
     if db:
-        logger.info(f"Updating info for {result} using sqlite...")
+        logger.info(f"Updating info for {result} using sqlite ...")
         imdb = Cinemagoer('s3', db)
     else:
         logger.info(f"Updating info for {result} ...")
