@@ -21,7 +21,7 @@
 </div>
 </details>
 <details>
-  <summary><i><a href="cogs/colors.py"><b>colors</b></a> - Easy color role management for both admins and users</i></summary>
+  <summary><i><a href="cogs/colors.py"><b>colors</b></a> - Easy color role management for both admins and users - <b>Inspired by <a href="https://fluxpoint.dev/reactify">Reactify</a></b></i></summary>
 
   - Admins can easily define new color roles by prefixing them with [C] (or change the prefix)
   - The cog will build a simple menu for users based on these rules
