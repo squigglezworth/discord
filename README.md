@@ -36,6 +36,7 @@ bot.add_cog(colors.Colors(bot, "[C]"))
 <details>
   <summary><i><a href="cogs/imdb.py"><b>imdb</b></a> - Simple IMDb lookup</i></summary>
   
+  - Consider building a local sqlite database using [imdb-dataset.sh](imdb-dataset.sh), as this will speed things up considerably
   - Search by name or provide an ID
   - To use, just import and add the cog
   - This will register `/imdb`
