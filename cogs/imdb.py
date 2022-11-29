@@ -4,13 +4,18 @@ from imdb import Cinemagoer, IMDbError
 from retry import retry
 
 logger = logging.getLogger("bot.imdb")
-imdb = Cinemagoer()
 
 @retry(tries=5)
-def search_movie(search):
+def search_movie(search, db):
     logger.info(f"Searching for {search} ...")
 
-    results = imdb.search_movie(search)
+    if db:
+        print(f"using db {db}")
+        imdb = Cinemagoer('s3', 'sqlite:///imdb.sqlite')
+    else:
+        imdb = Cinemagoer()
+
+    results = imdb.search_movie(search, results=5)
 
     if not len(results):
         raise IMDbError
@@ -18,16 +23,22 @@ def search_movie(search):
         logger.info("Done!")
         return results
 
+@retry(tries=5)
+def update_movie(result, db=None):
+    if db:
+        logger.info(f"Updating info for {result} using sqlite...")
+        imdb = Cinemagoer('s3', db)
+    else:
+        logger.info(f"Updating info for {result} ...")
+        imdb = Cinemagoer()
 
-def update_movie(result, info=["main"]):
-    logger.info(f"Updating info for {result} ...")
-
-    imdb.update(result, info)
+    imdb.update(result)
     logger.info(f"Done!")
 
 
 class Imdb(commands.Cog):
-    def __init__(self, bot, guilds=None):
+    def __init__(self, bot, db=None, guilds=None):
+        self.db = db
         logger.info(f"Registering /imdb" + (f" on {len(guilds)} guilds" if guilds else " globally"))
 
         bot.add_application_command(
@@ -55,7 +66,7 @@ class Imdb(commands.Cog):
             await ctx.interaction.response.defer(ephemeral=True)
 
             try:
-                self.results = search_movie(search)
+                self.results = search_movie(search, self.db)
             except:
                 self.results = []
             content = ""
@@ -71,13 +82,15 @@ class Imdb(commands.Cog):
 
         if len(results) > 1:
             logger.info("Search found; letting user choose")
+
             view = View(cog, ctx, results)
             embed.description = "Select a movie to send in the current channel:\n"
 
             for i in range(0, 5):
-                logger.info(f"Building embed for movie #{i}")
+                logger.info(f"Building embed for movie #{i+1}")
+
                 result = results[i]
-                update_movie(result)
+                update_movie(result, self.db)
 
                 url = f"https://imdb.com/title/tt{result.movieID}"
                 embed.description += f"{i+1}) ***[{result}]({url})*** ({result['year']})"
@@ -148,7 +161,7 @@ class Button(discord.ui.Button):
 
         super().__init__(
             label=index + 1,
-            custom_id=results[index].movieID,
+            custom_id=str(results[index].movieID),
             style=discord.ButtonStyle.success,
         )
 
@@ -157,6 +170,7 @@ class Button(discord.ui.Button):
         Callback for buttons
         """
 
+        imdb = Cinemagoer()
         result = imdb.get_movie(self.custom_id)
         self.cog.results = [result]
 

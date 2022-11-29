@@ -147,8 +147,9 @@ RoleMenus.register(bot, role_settings, GUILDS)
 color_prefix = "[C]"
 bot.add_cog(colors.Colors(bot, color_prefix, GUILDS))
 
+db = 'sqlite:///imdb.sqlite'
 bot.add_cog(memes.Memes(bot, GUILDS))
-bot.add_cog(imdb.Imdb(bot, GUILDS))
+bot.add_cog(imdb.Imdb(bot, db))
 
 class Button(discord.ui.Button):
     def __init__(self, ctx, options, buttons = None):
