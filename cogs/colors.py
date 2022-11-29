@@ -9,10 +9,7 @@ class Colors(commands.Cog):
         self.bot = bot
         self.prefix = prefix
 
-        logger.info(
-            f"Registering /colors"
-            + (f" on {len(guilds)} guilds" if guilds else " globally")
-        )
+        logger.info(f"Registering /colors" + (f" on {len(guilds)} guilds" if guilds else " globally"))
 
         command = discord.SlashCommand(
             self.CommandCallback,
@@ -71,11 +68,7 @@ class Colors(commands.Cog):
             options = []
 
             for r in ColorRoles:
-                options += [
-                    discord.SelectOption(
-                        label=r.name.removeprefix(cog.prefix), value=str(r.id)
-                    )
-                ]
+                options += [discord.SelectOption(label=r.name.removeprefix(cog.prefix), value=str(r.id))]
 
             super().__init__(
                 placeholder="🌈 Select a color!",
@@ -107,9 +100,7 @@ class Colors(commands.Cog):
                     await interaction.user.add_roles(role)
                     LastUpdate = [1, role]
 
-            embed, view = self.cog.Message(
-                self.ctx, LastUpdate, ExtraViews=self.ExtraViews
-            )
+            embed, view = self.cog.Message(self.ctx, LastUpdate, ExtraViews=self.ExtraViews)
 
             if self.ExtraViews:
                 for v in self.ExtraViews:

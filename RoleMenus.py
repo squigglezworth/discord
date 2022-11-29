@@ -40,9 +40,7 @@ class Dropdown(discord.ui.Select):
             # The above checks are necessary due to an outdated user instance - unsure how to retrieve an updated one
 
             # Add each role to the list of options
-            option = discord.SelectOption(
-                label=role.name, description=description, value=str(role.id)
-            )
+            option = discord.SelectOption(label=role.name, description=description, value=str(role.id))
             # Add the emoji provided during setup
             if r[2]:
                 option.emoji = r[2]
@@ -88,9 +86,7 @@ class Dropdown(discord.ui.Select):
                             MenuRoles += [r[0]]
 
                     # Add all the roles we're about to remove to the LastUpdates array
-                    for f in filter(
-                        lambda r: r.id in [r for r in MenuRoles], interaction.user.roles
-                    ):
+                    for f in filter(lambda r: r.id in [r for r in MenuRoles], interaction.user.roles):
                         LastUpdates.append([0, f])
 
                     # Filter out the roles in this menu from the user's roles
@@ -104,9 +100,7 @@ class Dropdown(discord.ui.Select):
                     # Update the user's roles
                     await interaction.user.edit(roles=UserRoles)
 
-                self.logger.info(
-                    f"[{self.ctx.command}] Adding roles to {interaction.user}"
-                )
+                self.logger.info(f"[{self.ctx.command}] Adding roles to {interaction.user}")
 
                 # Prepare info for updating the message
                 # added, role
@@ -120,9 +114,7 @@ class Dropdown(discord.ui.Select):
         # Retrieve the message embed & view
         # The embed contains some message, usually a list of the user's roles
         # The view contains the dropdown menus
-        embed, view = Message(
-            self.ctx, self.settings, UserRoles, LastUpdates, ExtraViews=self.ExtraViews
-        )
+        embed, view = Message(self.ctx, self.settings, UserRoles, LastUpdates, ExtraViews=self.ExtraViews)
 
         # Add any extra views (i.e., buttons) passed through
         if self.ExtraViews:
@@ -144,9 +136,7 @@ class ClearButton(discord.ui.Button):
         super().__init__(label="Clear all roles", style=discord.ButtonStyle.danger)
 
     async def callback(self, interaction):
-        self.logger.info(
-            f"[{self.ctx.command}] {interaction.user} selected 'Clear all'"
-        )
+        self.logger.info(f"[{self.ctx.command}] {interaction.user} selected 'Clear all'")
 
         # Build a list of all roles in this menu
         MenuRoles = []
@@ -156,21 +146,15 @@ class ClearButton(discord.ui.Button):
 
         # Add all the roles we're about to remove to the LastUpdates array
         LastUpdates = []
-        for f in filter(
-            lambda r: r.id in [r for r in MenuRoles], interaction.user.roles
-        ):
+        for f in filter(lambda r: r.id in [r for r in MenuRoles], interaction.user.roles):
             LastUpdates.append([0, f])
 
         # Remove them from the user's roles and update the user
-        UserRoles = list(
-            filter(lambda r: r.id not in [r for r in MenuRoles], interaction.user.roles)
-        )
+        UserRoles = list(filter(lambda r: r.id not in [r for r in MenuRoles], interaction.user.roles))
         await interaction.user.edit(roles=UserRoles)
 
         # Update the message
-        embed, view = Message(
-            self.ctx, self.settings, UserRoles, LastUpdates, self.ExtraViews
-        )
+        embed, view = Message(self.ctx, self.settings, UserRoles, LastUpdates, self.ExtraViews)
 
         for v in self.ExtraViews:
             view.add_item(v)
@@ -255,10 +239,7 @@ def register(bot, settings, guilds=None):
     SETTINGS = settings
 
     for c in settings:
-        logger.info(
-            f"Registering /{c}"
-            + (f" on {len(guilds)} guilds" if guilds else " globally")
-        )
+        logger.info(f"Registering /{c}" + (f" on {len(guilds)} guilds" if guilds else " globally"))
 
         command = discord.SlashCommand(
             CommandCallback,

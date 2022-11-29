@@ -632,14 +632,9 @@ class Memes(commands.Cog):
         global memes
         self.memes = memes
 
-        logger.info(
-            f"Registering /memes"
-            + (f" on {len(guilds)} guilds" if guilds else " globally")
-        )
+        logger.info(f"Registering /memes" + (f" on {len(guilds)} guilds" if guilds else " globally"))
 
-        command = discord.SlashCommand(
-            self.CommandCallback, name="memes", description="shitpost"
-        )
+        command = discord.SlashCommand(self.CommandCallback, name="memes", description="shitpost")
         bot.add_application_command(command)
 
     class BuildDropdown(discord.ui.Select):
@@ -650,9 +645,7 @@ class Memes(commands.Cog):
             for m in memes:
                 options += [discord.SelectOption(label=m, value=m)]
 
-            super().__init__(
-                placeholder=f"Meme Menu {index}", options=options, min_values=1
-            )
+            super().__init__(placeholder=f"Meme Menu {index}", options=options, min_values=1)
 
     class BuildView(discord.ui.View):
         def __init__(self, cog):

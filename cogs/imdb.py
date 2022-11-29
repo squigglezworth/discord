@@ -26,10 +26,7 @@ def update_movie(result):
 
 class Imdb(commands.Cog):
     def __init__(self, bot, guilds=None):
-        logger.info(
-            f"Registering /imdb"
-            + (f" on {len(guilds)} guilds" if guilds else " globally")
-        )
+        logger.info(f"Registering /imdb" + (f" on {len(guilds)} guilds" if guilds else " globally"))
 
         bot.add_application_command(
             discord.SlashCommand(
@@ -106,9 +103,7 @@ class Imdb(commands.Cog):
                 cast = [c["name"] for c in result["cast"][:n]]
                 embed.description += f"*Starring: {', '.join(cast)}*"
         else:
-            embed.description = (
-                "Uh oh, something went wrong! Please let <@267869612383666177> know!"
-            )
+            embed.description = "Uh oh, something went wrong! Please let <@267869612383666177> know!"
 
         return embed, view
 
