@@ -2,9 +2,12 @@
 *Constructive suggestions are welcome*
 
 ## Usage
-Check out [main.py](main.py) for examples on how to use these
+Check out [example.py](example.py) for basic usage of all these components.
 
-[main.py#L156-L203](main.py#L156-L203) combines views from RoleMenus & colors in one `/customize` command
+See [main.py](main.py) for more practical examples:
+- [Setting up logging](main.py#L123-L134)
+- [Loading some things from .env](main.py#L136-L139)
+- [main.py#L156-L203](main.py#L156-L203) combines views from RoleMenus & colors in one `/customize` command
 # 
 <details>
   <summary><i><a href="RoleMenus.py"><b>RoleMenus</b></a> - Powerful role management system</i></summary>
