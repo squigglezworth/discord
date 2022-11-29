@@ -1,14 +1,6 @@
 # ⚙️ Some things for Pycord
 *Constructive suggestions are welcome*
 
-## Usage
-Check out [example.py](example.py) for basic usage of all these components.
-
-See [main.py](main.py) for more practical examples:
-- [Setting up logging](main.py#L123-L134)
-- [Loading some things from .env](main.py#L136-L139)
-- [main.py#L156-L203](main.py#L156-L203) combines views from RoleMenus & colors in one `/customize` command
-# 
 <details>
   <summary><i><a href="RoleMenus.py"><b>RoleMenus</b></a> - Powerful role management system</i></summary>
 
@@ -56,3 +48,13 @@ bot.add_cog(colors.Colors(bot, "[C]"))
 <img width=300 src="https://user-images.githubusercontent.com/20311086/204405505-507a406d-8125-4fdc-b0cb-709a9b32d0fa.png" />
 <img width=300 src="https://user-images.githubusercontent.com/20311086/204405847-f88bd9c7-fc9f-4a8d-9042-55a530b13d28.png" />
 </details>
+
+## Usage
+Check out [example.py](example.py) for basic usage of all these components.
+
+See [main.py](main.py) for more practical examples:
+- [Setting up logging](main.py#L123-L134)
+- [Loading some things from .env](main.py#L136-L139)
+- [main.py#L156-L203](main.py#L156-L203) combines views from RoleMenus & colors in one `/customize` command
+# 
+
