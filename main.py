@@ -1,6 +1,3 @@
-# settings = {
-# }
-
 role_settings = {
     "roles": {
         "name": "roles",

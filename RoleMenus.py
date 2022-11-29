@@ -11,6 +11,7 @@ class Dropdown(discord.ui.Select):
         self.dropdown = dropdown
         self.settings = settings
         self.ctx = ctx
+        self.logger = logging.getLogger(f"bot.roles.{ctx.command}")
         self.ExtraViews = ExtraViews
 
         if dropdown["randomize"]:
@@ -19,6 +20,9 @@ class Dropdown(discord.ui.Select):
         # Start building the dropdown menu for a given list of 'roles'
         for r in dropdown["roles"]:
             role = ctx.guild.get_role(r[0])
+
+            if not role:
+                continue
 
             update = None
             if LastUpdates and role in [u[1] for u in LastUpdates]:
@@ -44,12 +48,13 @@ class Dropdown(discord.ui.Select):
                 option.emoji = r[2]
             options += [option]
 
-        # Assemble & return the dropdown menu
-        super().__init__(
-            placeholder=dropdown["placeholder"],
-            options=options,
-            min_values=1,
-        )
+        if options:
+            # Assemble & return the dropdown menu
+            super().__init__(
+                placeholder=dropdown["placeholder"],
+                options=options,
+                min_values=1,
+            )
 
     async def callback(self, interaction: discord.Interaction):
         """
@@ -62,9 +67,7 @@ class Dropdown(discord.ui.Select):
             role = interaction.guild.get_role(int(r))
             # Remove it if they already have it
             if role in interaction.user.roles:
-                logger.info(
-                    f"[{self.ctx.command}] Removing roles from {interaction.user}"
-                )
+                self.logger.info(f"Removing roles from {interaction.user}")
 
                 # Prepare info for updating the message
                 # deleted, role
@@ -76,9 +79,7 @@ class Dropdown(discord.ui.Select):
             else:
                 # If specified, only allow 1 role from this menu
                 if self.settings["max_one"]:
-                    logger.info(
-                        f"[{self.ctx.command}] max_one specified; removing all roles"
-                    )
+                    self.logger.info(f"max_one specified; removing all roles")
 
                     MenuRoles = []
                     # Assemble a list of all roles for this menu
@@ -103,7 +104,9 @@ class Dropdown(discord.ui.Select):
                     # Update the user's roles
                     await interaction.user.edit(roles=UserRoles)
 
-                logger.info(f"[{self.ctx.command}] Adding roles to {interaction.user}")
+                self.logger.info(
+                    f"[{self.ctx.command}] Adding roles to {interaction.user}"
+                )
 
                 # Prepare info for updating the message
                 # added, role
@@ -136,11 +139,14 @@ class ClearButton(discord.ui.Button):
         self.settings = settings
         self.LastUpdates = LastUpdates
         self.ExtraViews = ExtraViews
+        self.logger = logging.getLogger(f"bot.roles.{ctx.command}")
 
         super().__init__(label="Clear all roles", style=discord.ButtonStyle.danger)
 
     async def callback(self, interaction):
-        logger.info(f"[{self.ctx.command}] {interaction.user} selected 'Clear all'")
+        self.logger.info(
+            f"[{self.ctx.command}] {interaction.user} selected 'Clear all'"
+        )
 
         # Build a list of all roles in this menu
         MenuRoles = []
@@ -179,11 +185,16 @@ class View(discord.ui.View):
 
     def __init__(self, menu, ctx, LastUpdates=None, ExtraViews=None):
         super().__init__()
+        logger = logging.getLogger(f"bot.roles.{ctx.command}")
 
         for dropdown in menu["dropdowns"]:
-            self.add_item(Dropdown(dropdown, menu, ctx, LastUpdates, ExtraViews))
+            try:
+                self.add_item(Dropdown(dropdown, menu, ctx, LastUpdates, ExtraViews))
+            except:
+                logger.warning("Couldn't build dropdown!")
 
-        self.add_item(ClearButton(menu, ctx, LastUpdates, ExtraViews))
+        if self.children:
+            self.add_item(ClearButton(menu, ctx, LastUpdates, ExtraViews))
 
 
 def Message(ctx, menu, UserRoles=None, LastUpdates=None, ExtraViews=None):
@@ -218,12 +229,13 @@ def Message(ctx, menu, UserRoles=None, LastUpdates=None, ExtraViews=None):
     data = {"ctx": ctx, "RolesList": RolesList, "ShortRolesList": ShortRolesList}
     embed = discord.Embed(color=0x299AFF, description=menu["embed"].format(**data))
 
+    if not view.children:
+        embed.description = "Uh oh, something's went wrong. Please contact your admin!"
+
     return embed, view
 
 
 async def CommandCallback(ctx):
-    logger.info(f"[{ctx.command}] Responding to {ctx.user}")
-
     global SETTINGS
 
     # Prepare the embed & view for the initial response, passing the user's roles at the time of calling
