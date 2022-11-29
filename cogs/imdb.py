@@ -50,6 +50,7 @@ class Imdb(commands.Cog):
             await ctx.interaction.response.defer(ephemeral=False)
 
             self.results = [imdb.get_movie(search.lstrip("tt"))]
+            content = f"<@{ctx.user.id}>"
         else:
             await ctx.interaction.response.defer(ephemeral=True)
 
@@ -57,9 +58,11 @@ class Imdb(commands.Cog):
                 self.results = search_movie(search)
             except:
                 self.results = []
+            content = ""
 
         embed, view = self.Message(ctx, self)
-        await ctx.respond(embed=embed, view=view)
+
+        await ctx.respond(content=content, embed=embed, view=view)
 
     def Message(self, ctx, cog):
         embed = discord.Embed(color=0x299AFF)
@@ -93,18 +96,25 @@ class Imdb(commands.Cog):
 
             embed.description += "\n\n"
             if "creator" in result:
-                creators = [c["name"] for c in result["creator"]]
+                creators = []
+                for c in result["creator"]:
+                    creators += [f"[{c['name']}](https://imdb.com/name/nm{c.personID})"]
                 embed.description += f"*Created by: {', '.join(creators)}*\n"
             if "director" in result:
-                directors = [d["name"] for d in result["director"]]
+                directors = []
+                for d in result["director"]:
+                    directors += [f"[{d['name']}](https://imdb.com/name/nm{d.personID})"]
                 embed.description += f"*Directed by: {', '.join(directors)}*\n"
             if "cast" in result:
+                cast = []
                 n = 5  # Show 5 cast members at most
-                cast = [c["name"] for c in result["cast"][:n]]
+                for c in result["cast"][:n]:
+                    cast += [f"[{c['name']}](https://imdb.com/name/nm{c.personID})"]
                 embed.description += f"*Starring: {', '.join(cast)}*"
         else:
             embed.description = "Uh oh, something went wrong! Please let <@267869612383666177> know!"
 
+        embed.set_footer(text="Use /imdb to lookup TV/movies", icon_url="https://cdn.discordapp.com/attachments/525755278172356625/1046961975416066118/image.png")
         return embed, view
 
 
@@ -139,5 +149,5 @@ class Button(discord.ui.Button):
 
         embed, view = self.cog.Message(interaction, self.cog)
 
-        await self.ctx.channel.send(embed=embed, view=view)
+        await self.ctx.channel.send(content=f"<@{self.ctx.user.id}>", embed=embed, view=view)
         await self.ctx.delete()
