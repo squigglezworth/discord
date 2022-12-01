@@ -39,20 +39,23 @@ class Roles:
         """
         ctx = self.ctx
         menu = self.settings[str(ctx.command)]
-        embed_data = {"ctx": ctx, "RolesList": [], "ShortRolesList": []}
-        if not user_roles:df
+        embed_data = {"ctx": ctx, "RolesList": "", "ShortRolesList": "", "MenuRoles": ""}
+        if not user_roles:
             user_roles = ctx.user.roles
 
         # Assemble a list of all roles for this menu
-        roles = []ddf
+        roles = []
         for m in menu["dropdowns"]:
             for r in m["roles"]:
                 roles += [r[0]]
+                embed_data["MenuRoles"] += f"<@&{r[0]}>  "
+
         self.menu_roles = roles
 
-        # Here we build 2 strings that can be used in the embed
+        # Here we build some strings that can be used in the embed:
         # RolesList is a list of all the user's roles, save @everyone and anything in 'exclude''
         # ShortRolesList is a list of roles the user has that are also present in the menu
+        # MenuRoles (assembled above) is a list of roles in this menu
         for r in reversed(user_roles):
             if r.id not in menu["exclude"] + [484805623209525258]:
                 embed_data["RolesList"] += f"<@&{r.id}> "
@@ -88,6 +91,7 @@ class Roles:
                     self.add_item(self.Dropdown(dropdown, self, cog))
                 except:
                     cog.logger.warning("Couldn't build dropdown!")
+
             if self.children:
                 self.add_item(self.ClearButton(self, cog))
 
@@ -100,35 +104,34 @@ class Roles:
                 self.View = view
                 self.cog = cog
                 options = []
-                cog.logger.info(f"Assembling dropdown...")
 
                 if settings["randomize"]:
-                    cog.logger.info("Shuffling!")
                     shuffle(settings["roles"])
 
                 for r in settings["roles"]:
                     role = cog.ctx.guild.get_role(r[0])
 
                     if not role:
-                        cog.logger.info("Breaking!")
+                        cog.logger.warning(f"Role does not exist on server - {role}")
                         continue
-                    update = 0
+
+                    update = None
+                    description = r[1]
+                    # Check if the user added or removed this role last time
                     if view.updates and role in [u[1] for u in view.updates]:
                         update = list(filter(lambda u: u[1] == role, view.updates))[0][0]
-                    description = r[1]
+                    # Check if the user already has this role, or if they added it with the last interaction
                     if update == 1 or role in cog.ctx.user.roles:
                         description = "You already have this role; click to remove it"
-                    cog.logger.info(f"test")
                     if update == 0:
                         description = r[1]
 
-                    option = [discord.SelectOption(label=role.name, description=description, value=str(role.id))]
+                    option = discord.SelectOption(label=role.name, description=description, value=str(role.id))
 
                     if r[2]:
                         option.emoji = r[2]
 
-                    cog.logger.info("Adding option...")
-                    options += option
+                    options += [option]
 
                 if options:
                     super().__init__(
@@ -149,23 +152,18 @@ class Roles:
 
                     if role in user_roles:
                         # If the user already has the role, remove it
-                        cog.logger.info(f"Removing roles from {interaction.user} - {role}")
+                        self.cog.logger.info(f"Removing roles from {interaction.user} - {role}")
 
                         updates += [0, role]
                         user_roles.remove(role)
                         await interaction.user.remove_roles(role)
                     else:
                         # If the user doesn't have the role, add it
-                        if self.settings["max_one"]:
+                        if self.cog.settings[str(self.cog.ctx.command)]["max_one"]:
                             # But first, if max_one is set, remove any other roles the user has from this menu
-                            cog.logger.info(f"max_one specified; removing all roles...")
+                            self.cog.logger.info(f"max_one specified; removing all roles...")
 
                             roles = self.cog.menu_roles
-                            # roles = []
-                            # # Assemble a list of all the roles from this menu
-                            # for m in self.settings["dropdowns"]:
-                            #     for r in m["roles"]:
-                            #         roles += [r[0]]
 
                             # Add all the roles we're about to replace to the updates array
                             for r in filter(
@@ -183,16 +181,15 @@ class Roles:
                             )
                             await interaction.user.edit(roles=user_roles)
 
-                        # Let's finally add the role to the user
-                        cog.logger.info(f"Adding roles to {interaction.user} - {role}")
+                        self.cog.logger.info(f"Adding roles to {interaction.user} - {role}")
 
                         # Prepare some info for refresh
                         updates += [1, role]
                         user_roles.insert(0, role)
+                        # Let's finally add the role to the user
+                        await interaction.user.add_roles(role)
 
-                        await intercation.user.add_roles(role)
-
-                embed, view = self.cog.Message(user_roles, updates, self.View.extras)
+                embed, view = self.cog.Message(user_roles, [updates], self.View.extras)
 
                 if self.view.extras:
                     for v in self.View.extras:
@@ -217,16 +214,16 @@ class Roles:
                 self.cog.logger.info(f"Clearing all roles from {interaction.user}")
 
                 updates = []
-                for r in filter(lambda r: r.id in self.View.menu_roles, interaction.user.roles):
-                    updates += [0, r]
+                for r in filter(lambda r: r.id in self.cog.menu_roles, interaction.user.roles):
+                    updates.append([0, r])
 
-                user_roles = list(filter(lambda r: r.id not in self.View.menu_roles, interaction.user.roles))
+                user_roles = list(filter(lambda r: r.id not in self.cog.menu_roles, interaction.user.roles))
 
                 await interaction.user.edit(roles=user_roles)
-
                 embed, view = self.cog.Message(user_roles, updates, self.View.extras)
 
-                for v in self.view.extras:
-                    view.add_item(v)
+                if self.view.extras:
+                    for v in self.view.extras:
+                        view.add_item(v)
 
                 await interaction.response.edit_message(embed=embed, view=view)
