@@ -16,6 +16,7 @@ role_settings = {
                 "roles": [
                     # [<id>, "<description>", "<emoji>"]
                     [786356797429514261, "General EVE Online role", "<:eve:787273908528349204>"],
+                    [1045323484441616384, "Get notified about new corp giveaways", "🎉"],
                     [880572127823159366, "Get pings about mining fleets", "⛏️"],
                     [880572192872611871, "Notifications about PVP fleets", "⚔️"],
                     [885936958394748950, "Help the corp & corp members by hauling goods", "<:freighter:1040091624715341865>"],
@@ -106,13 +107,13 @@ role_settings = {
                     [1041322094543261716, "", "<:freighter:1040091624715341865>"],
                     [1041322195701481502, "", "📚"],
                     [1041335138434424942, "", "🥐"],
-                    [1042121441891582002, "", "💥"]
+                    [1042121441891582002, "", "💥"],
+                    [1043172047108440104, "", "<:verified:1043172431306702899>"]
                 ]
             }
         ]
     }
 }
-
 import discord, os, re, logging
 from dotenv import load_dotenv
 from discord.ext import commands
@@ -135,7 +136,7 @@ logger.setLevel(logging.INFO)
 
 load_dotenv()
 
-TOKEN = (os.getenv("DEBUG_TOKEN") if os.getenv("DEBUG") == "True" else os.getenv("PROD_TOKEN"))
+TOKEN = os.getenv("DEBUG_TOKEN") if os.getenv("DEBUG") == "True" else os.getenv("PROD_TOKEN")
 GUILDS = [int(g) for g in os.getenv("GUILDS").split(",")] if os.getenv("GUILDS") else []
 
 
@@ -147,13 +148,14 @@ RoleMenus.register(bot, role_settings, GUILDS)
 color_prefix = "[C]"
 bot.add_cog(colors.Colors(bot, color_prefix, GUILDS))
 
-db = 'sqlite:///imdb.sqlite'
+db = "sqlite:///imdb.sqlite"
 bot.add_cog(memes.Memes(bot, GUILDS))
-bot.add_cog(imdb.Imdb(bot, db))
+bot.add_cog(imdb.Imdb(bot, db=db))
+
 
 class Button(discord.ui.Button):
-    def __init__(self, ctx, options, buttons = None):
-        self.ctx =  ctx
+    def __init__(self, ctx, options, buttons=None):
+        self.ctx = ctx
         self.buttons = buttons
         global role_settings
         self.role_settings = role_settings
@@ -177,6 +179,7 @@ class Button(discord.ui.Button):
 
         await interaction.response.edit_message(embed=embed, view=view)
 
+
 async def customize(ctx):
     """
     Callback for /customize command
@@ -184,7 +187,7 @@ async def customize(ctx):
     buttons = [
         ["🥐 Roles", "roles", discord.ButtonStyle.blurple],
         ["🌈 Change your color", "colors", discord.ButtonStyle.green],
-        ["🚩 Select an icon", "icons", discord.ButtonStyle.blurple]
+        ["🚩 Select an icon", "icons", discord.ButtonStyle.blurple],
     ]
 
     view = discord.ui.View()
@@ -192,12 +195,19 @@ async def customize(ctx):
     for b in buttons:
         view.add_item(Button(ctx, b, buttons))
 
-    embed = discord.Embed(color=0x299aff, description="*Use the buttons below to personalize your presence in the server. Give yourself roles to share things with other members. Add an icon that displays next to your name. Give yourself a fancy color. The possibilities are nearly endless!*")
+    embed = discord.Embed(
+        color=0x299AFF,
+        description="*Use the buttons below to personalize your presence in the server. Give yourself roles to share things with other members. Add an icon that displays next to your name. Give yourself a fancy color. The possibilities are nearly endless!*",
+    )
 
     await ctx.respond(ephemeral=True, embed=embed, view=view)
 
+
 logger.info(f"Registering /customize" + (f" on {len(GUILDS)} guilds" if GUILDS else " globally"))
-command = discord.SlashCommand(customize, description="Personalize your presence in the server - change the color of your name, add an icon, and more!")
+command = discord.SlashCommand(
+    customize,
+    description="Personalize your presence in the server - change the color of your name, add an icon, and more!",
+)
 bot.add_application_command(command)
 
 
@@ -205,6 +215,7 @@ bot.add_application_command(command)
 async def on_application_command(ctx):
     logger = logging.getLogger(f"bot.{ctx.command}")
     logger.info(f"Responding to {ctx.user}")
+
 
 @bot.event
 async def on_ready():
