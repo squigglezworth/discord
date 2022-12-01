@@ -37,6 +37,7 @@ class Colors(commands.Cog):
         for r in ColorRoles:
             RoleList += f"<@&{r.id}>  "
 
+        UserColor = "empty!"
         if LastUpdate:
             UserColor = f"<@&{LastUpdate[1].id}>" if LastUpdate[0] == 1 else f"empty!"
         else:
@@ -58,6 +59,7 @@ class Colors(commands.Cog):
             super().__init__()
 
             self.add_item(cog.Dropdown(ctx, ColorRoles, cog, ExtraViews))
+            self.add_item(cog.ClearButton(ctx, ColorRoles, cog, ExtraViews))
 
     class Dropdown(discord.ui.Select):
         def __init__(self, ctx, ColorRoles, cog, ExtraViews=None):
@@ -104,6 +106,32 @@ class Colors(commands.Cog):
 
             if self.ExtraViews:
                 for v in self.ExtraViews:
+                    view.add_item(v)
+
+            await interaction.response.edit_message(embed=embed, view=view)
+
+    class ClearButton(discord.ui.Button):
+        def __init__(self, ctx, roles, cog, extras):
+            self.ctx = ctx
+            self.roles = roles
+            self.cog = cog
+            self.extras = extras
+
+            super().__init__(label="Clear color role", style=discord.ButtonStyle.danger)
+
+        async def callback(self, interaction):
+            # Add all the roles we're about to remove to the updates array
+            updates = []
+            for f in filter(lambda r: r.id in [r.id for r in self.roles], interaction.user.roles):
+                updates.append([0, f])
+
+            user_roles = list(filter(lambda r: r.id not in [r.id for r in self.roles], interaction.user.roles))
+            await interaction.user.edit(roles=user_roles)
+
+            embed, view = self.cog.Message(self.ctx, updates, self.extras)
+
+            if self.extras:
+                for v in self.extras:
                     view.add_item(v)
 
             await interaction.response.edit_message(embed=embed, view=view)
