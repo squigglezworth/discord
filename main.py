@@ -15,14 +15,26 @@ role_settings = {
                 "randomize": 0,
                 "roles": [
                     # [<id>, "<description>", "<emoji>"]
-                    [786356797429514261, "General EVE Online role", "<:eve:787273908528349204>"],
+                    [
+                        786356797429514261,
+                        "General EVE Online role",
+                        "<:eve:787273908528349204>",
+                    ],
                     [1045323484441616384, "Get notified about new corp giveaways", "🎉"],
                     [880572127823159366, "Get pings about mining fleets", "⛏️"],
                     [880572192872611871, "Notifications about PVP fleets", "⚔️"],
-                    [885936958394748950, "Help the corp & corp members by hauling goods", "<:freighter:1040091624715341865>"],
-                    [1042294285741084743, "Share info about wormholes and other exploration sites", "<:wormhole:1042298751336861779>"],
-                    [1042294090802417694, "Buy & sell goods in #marketplace", "📈"]
-                ]
+                    [
+                        885936958394748950,
+                        "Help the corp & corp members by hauling goods",
+                        "<:freighter:1040091624715341865>",
+                    ],
+                    [
+                        1042294285741084743,
+                        "Share info about wormholes and other exploration sites",
+                        "<:wormhole:1042298751336861779>",
+                    ],
+                    [1042294090802417694, "Buy & sell goods in #marketplace", "📈"],
+                ],
             },
             {
                 "placeholder": "🏳️‍🌈 LGBT roles - Grant access to the #🌈lgbt channel",
@@ -38,21 +50,25 @@ role_settings = {
                     [1007623250118987796, "", ""],
                     [1007573999699628072, "", ""],
                     [1007574163302658081, "", ""],
-                    [1007574166242861117, "", ""]
-                ]
+                    [1007574166242861117, "", ""],
+                ],
             },
             {
                 "placeholder": "Misc/Topic roles",
                 "randomize": 0,
                 "roles": [
                     # [<id>, "<description>", "<emoji>"]
-                    [1037691564954238996, "Grants access to the neurodivergent chat channel", ""],
+                    [
+                        1037691564954238996,
+                        "Grants access to the neurodivergent chat channel",
+                        "",
+                    ],
                     [972970423744610374, "", ""],
                     [972970633174614058, "", ""],
-                    [972970544670584852, "", ""]
-                ]
-            }
-        ]
+                    [972970544670584852, "", ""],
+                ],
+            },
+        ],
     },
     "icons": {
         # /role <name>
@@ -79,8 +95,8 @@ role_settings = {
                     [1041719288437944410, "", "🦉"],
                     [1041726074775687279, "", "<:redpanda:1041725947243675729>"],
                     [1041726257957703791, "", "🐱"],
-                    [1041726321480454275, "", "🐶"]
-                ]
+                    [1041726321480454275, "", "🐶"],
+                ],
             },
             {
                 "placeholder": "🏳️‍🌈 LGBT Icons",
@@ -92,10 +108,14 @@ role_settings = {
                     [1041321940998168627, "", "🏳️‍⚧️"],
                     [1041321961697071214, "", "<:male_symbol:1041757493010894958>"],
                     [1041322000469196850, "", "<:female_symbol:1041757820900605972>"],
-                    [1041322026234822716, "", "<:TransgenderSymbol:1007581443867815956>"],
+                    [
+                        1041322026234822716,
+                        "",
+                        "<:TransgenderSymbol:1007581443867815956>",
+                    ],
                     [1041322212982018059, "", "<:AsexualPride:1007623033189568562>"],
-                    [1041322264815218688, "", "<:AromanticPride:1007623034959581245>"]
-                ]
+                    [1041322264815218688, "", "<:AromanticPride:1007623034959581245>"],
+                ],
             },
             {
                 "placeholder": "🥐 Misc. Icons",
@@ -103,16 +123,20 @@ role_settings = {
                 "roles": [
                     [1041322728365506620, "", "<:logo:875904386444967946>"],
                     [1041322473783840888, "", "<:corplogo:787272419127722004>"],
-                    [1041322146636513360, "", "<:NeurodiversityPride:1037203581733974026>"],
+                    [
+                        1041322146636513360,
+                        "",
+                        "<:NeurodiversityPride:1037203581733974026>",
+                    ],
                     [1041322094543261716, "", "<:freighter:1040091624715341865>"],
                     [1041322195701481502, "", "📚"],
                     [1041335138434424942, "", "🥐"],
                     [1042121441891582002, "", "💥"],
-                    [1043172047108440104, "", "<:verified:1043172431306702899>"]
-                ]
-            }
-        ]
-    }
+                    [1043172047108440104, "", "<:verified:1043172431306702899>"],
+                ],
+            },
+        ],
+    },
 }
 import discord, os, re, logging
 from dotenv import load_dotenv
@@ -136,7 +160,11 @@ logger.setLevel(logging.INFO)
 
 load_dotenv()
 
-TOKEN = os.getenv("DEBUG_TOKEN") if os.getenv("DEBUG") == "True" else os.getenv("PROD_TOKEN")
+TOKEN = (
+    os.getenv("DEBUG_TOKEN")
+    if os.getenv("DEBUG") == "True"
+    else os.getenv("PROD_TOKEN")
+)
 GUILDS = [int(g) for g in os.getenv("GUILDS").split(",")] if os.getenv("GUILDS") else []
 
 
@@ -169,7 +197,9 @@ class Button(discord.ui.Button):
         buttons = [Button(self.ctx, b, self.buttons) for b in self.buttons]
 
         if self.custom_id in ["roles", "icons"]:
-            embed, view = RoleMenus.Message(self.ctx, self.role_settings[self.custom_id], ExtraViews=buttons)
+            embed, view = RoleMenus.Message(
+                self.ctx, self.role_settings[self.custom_id], ExtraViews=buttons
+            )
         if self.custom_id == "colors":
             cog = bot.get_cog("Colors")
             embed, view = cog.Message(interaction, ExtraViews=buttons)
@@ -203,7 +233,9 @@ async def customize(ctx):
     await ctx.respond(ephemeral=True, embed=embed, view=view)
 
 
-logger.info(f"Registering /customize" + (f" on {len(GUILDS)} guilds" if GUILDS else " globally"))
+logger.info(
+    f"Registering /customize" + (f" on {len(GUILDS)} guilds" if GUILDS else " globally")
+)
 command = discord.SlashCommand(
     customize,
     description="Personalize your presence in the server - change the color of your name, add an icon, and more!",

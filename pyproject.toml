@@ -3,7 +3,6 @@ line-length = 88
 target-version = ['py39']
 include = '\.pyi?$'
 extend-exclude = '''
-^/main.py
 '''
 
 [tool.pyright]
