@@ -3,13 +3,31 @@ role_settings = {
         "name": "roles",
         "description": "Add/remove various roles from yourself. Tag them to share links, chat with others, etc",
         # Embed content
-        "embed": "*Hello <@{ctx.user.id}>, your current roles are:\n{RolesList}\n\nUse the menus below to add or remove roles.*",
+        "embed": "*Hello <@{ctx.user.id}>, your current roles are:\n{RolesList}\n\nUse the menus below to add or remove roles\n**Everyone is encouraged to @ping these roles to share things of interest, to find others to play games with, etc***",
         # No limit
         "max_one": 0,
         # List of role IDs to exclude from the listing of the user's current roles
         # @everyone is automatically excluded
         "exclude": [983269188036608050, 637192413584293889],
         "dropdowns": [
+            {
+                "placeholder": "🎮 Game roles",
+                # Set this to 1 to randomize the order of roles for this dropdown
+                "randomize": 0,
+                "roles": [
+                    [690896728953585674, "", "<:warships:787272758354116619>"],
+                    [765302061792886815, "", "<:elite:787273549404438528>"],
+                    [683056749460062262, "", "<:warframe:787275270578503720>"],
+                    [790003154724978688, "", "<:minecraft:790003030925246484>"],
+                    [791231782543425536, "", "<:arma3:791231464174780456>"],
+                    [791232272007036928, "", "💰"],
+                    [819007747801481257, "", "<:fallout:819007399817248789>"],
+                    [836707348076167247, "", "<:f1:835693536640761856>"],
+                    [843389345485422592, "", "<:starcitizenwhite:843386176001802240>"],
+                    [849037771993907201, "", "<:tarkov:849037591718395905>"],
+                    [861315460099473439, "", "<:valheim:861315289320259604>"],
+                ],
+            },
             {
                 "placeholder": "EVE Online roles",
                 "randomize": 0,
@@ -143,7 +161,7 @@ from dotenv import load_dotenv
 from discord.ext import commands
 
 import RoleMenus
-from cogs import colors, memes, imdb
+from cogs import colors, memes, imdb, roles
 
 # Setup logging formatter & stream handler
 formatter = logging.Formatter(f"%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -160,16 +178,12 @@ logger.setLevel(logging.INFO)
 
 load_dotenv()
 
-TOKEN = (
-    os.getenv("DEBUG_TOKEN")
-    if os.getenv("DEBUG") == "True"
-    else os.getenv("PROD_TOKEN")
-)
+TOKEN = os.getenv("DEBUG_TOKEN") if os.getenv("DEBUG") == "True" else os.getenv("PROD_TOKEN")
 GUILDS = [int(g) for g in os.getenv("GUILDS").split(",")] if os.getenv("GUILDS") else []
-
 
 bot = discord.Bot(debug_guilds=GUILDS)
 
+# roles.Roles(bot, role_settings)
 RoleMenus.register(bot, role_settings, GUILDS)
 
 # Prefix your color roles with [C] (or change the prefix)
@@ -197,9 +211,7 @@ class Button(discord.ui.Button):
         buttons = [Button(self.ctx, b, self.buttons) for b in self.buttons]
 
         if self.custom_id in ["roles", "icons"]:
-            embed, view = RoleMenus.Message(
-                self.ctx, self.role_settings[self.custom_id], ExtraViews=buttons
-            )
+            embed, view = RoleMenus.Message(self.ctx, self.role_settings[self.custom_id], ExtraViews=buttons)
         if self.custom_id == "colors":
             cog = bot.get_cog("Colors")
             embed, view = cog.Message(interaction, ExtraViews=buttons)
@@ -233,9 +245,7 @@ async def customize(ctx):
     await ctx.respond(ephemeral=True, embed=embed, view=view)
 
 
-logger.info(
-    f"Registering /customize" + (f" on {len(GUILDS)} guilds" if GUILDS else " globally")
-)
+logger.info(f"Registering /customize" + (f" on {len(GUILDS)} guilds" if GUILDS else " globally"))
 command = discord.SlashCommand(
     customize,
     description="Personalize your presence in the server - change the color of your name, add an icon, and more!",
