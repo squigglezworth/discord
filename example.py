@@ -48,8 +48,13 @@ RoleMenus.register(bot, menus)
 color_prefix = "[C]"
 bot.add_cog(colors.Colors(bot, color_prefix))
 
-# Misc. cogs
+# cogs/imdb.py
+# I highly recommend using the imdb-dataset.sh script to generate a local copy of the IMDb dataset
+# This will increase reliability & speed of this command
+db = 'sqlite:///imdb.sqlite'
+bot.add_cog(imdb.Imdb(bot, db))
+
+# cogs/memes.py
 bot.add_cog(memes.Memes(bot))
-bot.add_cog(imdb.Imdb(bot))
 
 bot.run(<TOKEN>)
