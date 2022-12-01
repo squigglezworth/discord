@@ -2,12 +2,12 @@
 *Constructive suggestions are welcome*
 
 <details>
-  <summary><i><a href="RoleMenus.py"><b>RoleMenus</b></a> - Powerful role management system</i></summary>
+  <summary><i><a href="RoleMenus.py"><b><code>RoleMenus</code></b></a> - Powerful role management system</i></summary>
 
   - Give users a simple role management UI
   - Define multiple commands/menus at runtime
   - Allow only a single role per menu (e.g. for letting the user choose a role icon role)
-  - To use, see [main.py#L4-L117](main.py#L4-L117) for how to define menus, then import RoleMenus and call `RoleMenus.register()`
+  - To use, see [`main.py#L4-L117`](main.py#L4-L117) for how to define menus, then import RoleMenus and call `RoleMenus.register()`
   - This will register at least 1 new command based on the settings provided
   ```python
   import RoleMenus
@@ -21,9 +21,9 @@
 </div>
 </details>
 <details>
-  <summary><i><a href="cogs/colors.py"><b>colors</b></a> - Easy color role management for both admins and users - <b>Inspired by <a href="https://fluxpoint.dev/reactify">Reactify</a></b></i></summary>
+  <summary><i><a href="cogs/colors.py"><b><code>colors</code></b></a> - Easy color role management for both admins and users - <b>Inspired by <a href="https://fluxpoint.dev/reactify">Reactify</a></b></i></summary>
 
-  - Admins can easily define new color roles by prefixing them with [C] (or change the prefix)
+  - Admins can easily define new color roles by prefixing them with `[C]` (or change the prefix)
   - The cog will build a simple menu for users based on these rules
   - To use, simply add some color roles to your server, then import & add the cog
   - This will register `/colors`
@@ -34,9 +34,9 @@ bot.add_cog(colors.Colors(bot, "[C]"))
 <img width=400 src="https://user-images.githubusercontent.com/20311086/201162102-163788cd-9231-4cfe-81a9-661c24b7a22a.png" />
 </details>
 <details>
-  <summary><i><a href="cogs/imdb.py"><b>imdb</b></a> - Simple IMDb lookup</i></summary>
+  <summary><i><a href="cogs/imdb.py"><b><code>imdb</code></b></a> - Simple IMDb lookup</i></summary>
   
-  - Consider building a local sqlite database using [imdb-dataset.sh](imdb-dataset.sh), as this will speed things up considerably
+  - Consider building a local sqlite database using [`imdb-dataset.sh`](imdb-dataset.sh), as this will speed things up considerably
   - Search by name or provide an ID
   - To use, just import and add the cog
   - This will register `/imdb`
@@ -51,11 +51,11 @@ bot.add_cog(colors.Colors(bot, "[C]"))
 </details>
 
 ## Usage
-Check out [example.py](example.py) for basic usage of all these components.
+Check out [`example.py`](example.py) for basic usage of all these components.
 
-See [main.py](main.py) for more practical examples:
+See [`main.py`](main.py) for more practical examples:
 - [Setting up logging](main.py#L123-L134)
-- [Loading some things from .env](main.py#L136-L139)
-- [main.py#L156-L203](main.py#L156-L203) combines views from RoleMenus & colors in one `/customize` command
+- [Loading some things from `.env`](main.py#L136-L139)
+- [`main.py#L156-L203`](main.py#L156-L203) combines views from RoleMenus & colors in one `/customize` command
 # 
 
