@@ -55,20 +55,20 @@ role_settings = {
                 ],
             },
             {
-                "placeholder": "🏳️‍🌈 LGBT roles - Grant access to the #🌈lgbt channel",
+                "placeholder": "🏳️‍🌈 LGBT roles",
                 "randomize": 0,
                 "roles": [
                     # [<id>, "<description>", "<emoji>"]
-                    [1007573574082642011, "", ""],
-                    [1007573880728199188, "", ""],
-                    [1007573890198949920, "", ""],
-                    [1007573993135558679, "", ""],
-                    [1007575326227972209, "", ""],
-                    [1007623293811032157, "", ""],
-                    [1007623250118987796, "", ""],
-                    [1007573999699628072, "", ""],
-                    [1007574163302658081, "", ""],
-                    [1007574166242861117, "", ""],
+                    [1007573574082642011, "All of these grant access to the #🌈lgbt channel", "<:prideflag:1004829674112811170> "],
+                    [1007573880728199188, "", "<:LesbianPride:1007578778035290112> "],
+                    [1007573890198949920, "", "<:BisexualPride:1007578776630198303> "],
+                    [1007573993135558679, "", "<:prideflag:1004829674112811170> "],
+                    [1007575326227972209, "", "<:TransPride:1007578772935024660> "],
+                    [1007623293811032157, "", "<:AsexualPride:1007623033189568562> "],
+                    [1007623250118987796, "", "<:AromanticPride:1007623034959581245> "],
+                    [1007573999699628072, "", "<:male_symbol:1041757493010894958> "],
+                    [1007574163302658081, "", "<:female_symbol:1041757820900605972> "],
+                    [1007574166242861117, "", "<:TransgenderSymbol:1007581443867815956>"],
                 ],
             },
             {
@@ -79,11 +79,12 @@ role_settings = {
                     [
                         1037691564954238996,
                         "Grants access to the neurodivergent chat channel",
-                        "",
+                        "<:NeurodiversityPride:1037203581733974026>",
                     ],
-                    [972970423744610374, "", ""],
-                    [972970633174614058, "", ""],
-                    [972970544670584852, "", ""],
+                    [972970423744610374, "", "<:f1:835693536640761856>"],
+                    [972970633174614058, "", "📚"],
+                    [1020370146063286423, "Visit the #book-club channel to share what you're reading!", "📖"],
+                    [972970544670584852, "", "🎬"],
                 ],
             },
         ],
@@ -183,16 +184,16 @@ GUILDS = [int(g) for g in os.getenv("GUILDS").split(",")] if os.getenv("GUILDS")
 
 bot = discord.Bot(debug_guilds=GUILDS)
 
-# roles.Roles(bot, role_settings)
-RoleMenus.register(bot, role_settings, GUILDS)
+roles.Roles(bot, role_settings)
+# RoleMenus.register(bot, role_settings, GUILDS)
 
 # Prefix your color roles with [C] (or change the prefix)
 color_prefix = "[C]"
 bot.add_cog(colors.Colors(bot, color_prefix, GUILDS))
 
 db = "sqlite:///imdb.sqlite"
-bot.add_cog(memes.Memes(bot, GUILDS))
 bot.add_cog(imdb.Imdb(bot, db=db))
+bot.add_cog(memes.Memes(bot, GUILDS))
 
 
 class Button(discord.ui.Button):
