@@ -2,17 +2,17 @@
 *Constructive suggestions are welcome*
 
 <details>
-  <summary><i><a href="RoleMenus.py"><b><code>RoleMenus</code></b></a> - Powerful role management system</i></summary>
+  <summary><i><a href="cogs/roles.py"><b><code>roles</code></b></a> - Powerful role management system</i></summary>
 
   - Give users a simple role management UI
   - Define multiple commands/menus at runtime
   - Allow only a single role per menu (e.g. for letting the user choose a role icon role)
-  - To use, see [`main.py#L4-L117`](main.py#L4-L117) for how to define menus, then import RoleMenus and call `RoleMenus.register()`
+  - To use, see [`main.py#L4-L117`](main.py#L4-L117) for how to define menus, then import roles and call `roles.Roles()`
   - This will register at least 1 new command based on the settings provided
   ```python
-  import RoleMenus
+  from cogs import roles
   role_settings = { ... }
-  RoleMenus.register(bot, role_settings)
+  roles.Roles(bot, role_settings)
   ```
 <div>
   <img width=300 src="https://user-images.githubusercontent.com/20311086/204404664-07412de2-a306-42ec-b39c-5b7479b6c3d1.png" />
@@ -56,6 +56,6 @@ Check out [`example.py`](example.py) for basic usage of all these components.
 See [`main.py`](main.py) for more practical examples:
 - [Setting up logging](main.py#L123-L134)
 - [Loading some things from `.env`](main.py#L136-L139)
-- [`main.py#L156-L203`](main.py#L156-L203) combines views from RoleMenus & colors in one `/customize` command
+- [`main.py#L156-L203`](main.py#L156-L203) combines views from `roles` & `colors` in one `/customize` command
 # 
 
