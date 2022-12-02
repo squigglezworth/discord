@@ -28,17 +28,24 @@ class Roles:
         Callback for commands
         """
         self.ctx = ctx
-        self.logger = logging.getLogger(f"bot.roles.{ctx.command}")
         embed, view = self.Message()
 
         await ctx.respond(ephemeral=True, embed=embed, view=view)
 
-    def Message(self, user_roles=None, updates=None, extras=None):
+    def Message(self, ctx=None, menu=None, user_roles=None, updates=None, extras=None):
         """
         Assemble the message - including an embed and the View
         """
-        ctx = self.ctx
-        menu = self.settings[str(ctx.command)]
+        if ctx:
+            self.ctx = ctx
+        else:
+            ctx = self.ctx
+
+        self.logger = logging.getLogger(f"bot.roles.{ctx.command}")
+
+        if not menu:
+            menu = self.settings[str(ctx.command)]
+
         embed_data = {"ctx": ctx, "RolesList": "", "ShortRolesList": "", "MenuRoles": ""}
         if not user_roles:
             user_roles = ctx.user.roles
@@ -65,7 +72,7 @@ class Roles:
             embed_data["ShortRolesList"] = "empty!"
 
         # Prepare & return the view and embed
-        view = self.View(self, updates, extras)
+        view = self.View(self, menu, updates, extras)
 
         embed = discord.Embed(color=0x299AFF, description=menu["embed"].format(**embed_data))
 
@@ -75,16 +82,16 @@ class Roles:
         return embed, view
 
     class View(discord.ui.View):
-        def __init__(self, cog, updates=None, extras=None):
+        def __init__(self, cog, menu, updates=None, extras=None):
             """
             The View holds dropdowns, buttons, etc
             """
             super().__init__()
 
             self.cog = cog
+            self.menu = menu
             self.updates = updates
             self.extras = extras
-            menu = cog.settings[str(cog.ctx.command)]
 
             for dropdown in menu["dropdowns"]:
                 try:
@@ -159,7 +166,7 @@ class Roles:
                         await interaction.user.remove_roles(role)
                     else:
                         # If the user doesn't have the role, add it
-                        if self.cog.settings[str(self.cog.ctx.command)]["max_one"]:
+                        if self.View.menu["max_one"]:
                             # But first, if max_one is set, remove any other roles the user has from this menu
                             self.cog.logger.info(f"max_one specified; removing all roles...")
 
@@ -189,7 +196,7 @@ class Roles:
                         # Let's finally add the role to the user
                         await interaction.user.add_roles(role)
 
-                embed, view = self.cog.Message(user_roles, [updates], self.View.extras)
+                embed, view = self.cog.Message(menu=self.View.menu, user_roles=user_roles, updates=[updates], extras=self.View.extras)
 
                 if self.view.extras:
                     for v in self.View.extras:
@@ -220,7 +227,7 @@ class Roles:
                 user_roles = list(filter(lambda r: r.id not in self.cog.menu_roles, interaction.user.roles))
 
                 await interaction.user.edit(roles=user_roles)
-                embed, view = self.cog.Message(user_roles, updates, self.View.extras)
+                embed, view = self.cog.Message(menu=self.View.menu, user_roles=user_roles, updates=updates, extras=self.View.extras)
 
                 if self.view.extras:
                     for v in self.view.extras:

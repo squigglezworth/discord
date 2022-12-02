@@ -161,7 +161,6 @@ import discord, os, re, logging
 from dotenv import load_dotenv
 from discord.ext import commands
 
-import RoleMenus
 from cogs import colors, memes, imdb, roles
 
 # Setup logging formatter & stream handler
@@ -184,8 +183,8 @@ GUILDS = [int(g) for g in os.getenv("GUILDS").split(",")] if os.getenv("GUILDS")
 
 bot = discord.Bot(debug_guilds=GUILDS)
 
-roles.Roles(bot, role_settings)
-# RoleMenus.register(bot, role_settings, GUILDS)
+# Register role menus
+roles = roles.Roles(bot, role_settings)
 
 # Prefix your color roles with [C] (or change the prefix)
 color_prefix = "[C]"
@@ -212,7 +211,7 @@ class Button(discord.ui.Button):
         buttons = [Button(self.ctx, b, self.buttons) for b in self.buttons]
 
         if self.custom_id in ["roles", "icons"]:
-            embed, view = RoleMenus.Message(self.ctx, self.role_settings[self.custom_id], ExtraViews=buttons)
+            embed, view = roles.Message(ctx=self.ctx, updates=None, menu=self.role_settings[self.custom_id], extras=buttons)
         if self.custom_id == "colors":
             cog = bot.get_cog("Colors")
             embed, view = cog.Message(interaction, ExtraViews=buttons)
