@@ -52,10 +52,35 @@ class Roles:
 
         # Assemble a list of all roles for this menu
         roles = []
-        for m in menu["dropdowns"]:
-            for r in m["roles"]:
-                roles += [r[0]]
-                embed_data["MenuRoles"] += f"<@&{r[0]}>  "
+        if menu["auto_populate"] and any(menu["auto_populate"].values()):
+            guild_roles = ctx.guild.roles
+
+            for a in menu["auto_populate"]:
+                if menu["auto_populate"][a]:
+                    regex = menu["auto_populate"][a]
+                    match a:
+                        case "anywhere":
+                            pattern = re.compile(f"^.*{re.escape(regex)}.*$")
+                            roles += list(filter(lambda x: pattern.match(x.name), guild_roles))
+                        case "prefix":
+                            pattern = re.compile(f"^{re.escape(regex)}.*$")
+                            roles += list(filter(lambda x: pattern.match(x.name), guild_roles))
+                        case "suffix":
+                            pattern = re.compile(f"^.*{re.escape(regex)}$")
+                            roles += list(filter(lambda x: pattern.match(x.name), guild_roles))
+                        case _:
+                            self.logger.warning("Something went wrong while auto populating this dropdown")
+            if not roles:
+                self.logger.warning("No roles were found matching the regex specified")
+            for r in roles:
+                embed_data["MenuRoles"] += f"<@&{r.id}>  "
+            # Collapse down to a simple list of IDs
+            roles = [r.id for r in roles]
+        else:
+            for m in menu["dropdowns"]:
+                for r in m["roles"]:
+                    roles += [r[0]]
+                    embed_data["MenuRoles"] += f"<@&{r[0]}>  "
 
         self.menu_roles = roles
 

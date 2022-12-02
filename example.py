@@ -34,6 +34,20 @@ menus = {
             }
         ]
     },
+    "auto_populate example": {
+        "name": "example",
+        "description": "Another example",
+        "embed": "",
+        "max_one": 1,
+        "exclude": [],
+        "auto_populate": {
+            "match": ".*",
+            "prefix": "[C]",
+            "suffix": "",
+        },
+        "dropdowns": [
+        ]
+    }
 }
 
 import discord, RoleMenus
