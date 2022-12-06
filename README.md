@@ -14,11 +14,7 @@
   role_settings = { ... }
   roles.Roles(bot, role_settings)
   ```
-<div>
-  <img width=300 src="https://user-images.githubusercontent.com/20311086/204404664-07412de2-a306-42ec-b39c-5b7479b6c3d1.png" />
-  <img width=300 src="https://user-images.githubusercontent.com/20311086/204404999-318706f3-36f2-434e-bf1d-f983e4ee345c.png" />
-
-</div>
+  <hr>
 </details>
 <details>
   <summary><i><a href="cogs/colors.py"><b><code>colors</code></b></a> - Easy color role management for both admins and users - <b>Inspired by <a href="https://fluxpoint.dev/reactify">Reactify</a></b></i></summary>
@@ -31,7 +27,7 @@
 from cogs import colors
 bot.add_cog(colors.Colors(bot, "[C]"))
 ```
-<img width=400 src="https://user-images.githubusercontent.com/20311086/201162102-163788cd-9231-4cfe-81a9-661c24b7a22a.png" />
+<hr>
 </details>
 <details>
   <summary><i><a href="cogs/imdb.py"><b><code>imdb</code></b></a> - Simple IMDb lookup</i></summary>
@@ -44,10 +40,7 @@ bot.add_cog(colors.Colors(bot, "[C]"))
   from cogs import imdb
   bot.add_cog(imdb.Imdb(bot))
   ```
-<img width=500 src="https://user-images.githubusercontent.com/20311086/204405345-07660af7-245b-4115-813e-db56570b51c1.png" />
-<br>
-<img width=300 src="https://user-images.githubusercontent.com/20311086/204405505-507a406d-8125-4fdc-b0cb-709a9b32d0fa.png" />
-<img width=300 src="https://user-images.githubusercontent.com/20311086/204405847-f88bd9c7-fc9f-4a8d-9042-55a530b13d28.png" />
+  <hr>
 </details>
 
 ## Usage
@@ -57,5 +50,25 @@ See [`main.py`](main.py) for more practical examples:
 - [Setting up logging](main.py#L123-L134)
 - [Loading some things from `.env`](main.py#L136-L139)
 - [`main.py#L156-L203`](main.py#L156-L203) combines views from `roles` & `colors` in one `/customize` command
-# 
 
+## Screenshots
+<details>
+<summary><code>/customize</code></summary>
+<img width=400 src="https://user-images.githubusercontent.com/20311086/205825222-a8a3e84a-2472-480c-9d46-eef7d5301285.gif" />
+</details>
+<details>
+<summary><code>roles</code></summary>
+  <img width=300 src="https://user-images.githubusercontent.com/20311086/204404664-07412de2-a306-42ec-b39c-5b7479b6c3d1.png" />
+  <img width=300 src="https://user-images.githubusercontent.com/20311086/204404999-318706f3-36f2-434e-bf1d-f983e4ee345c.png" />
+</details>
+<details>
+<summary><code>imdb</code></summary>
+<img width=500 src="https://user-images.githubusercontent.com/20311086/204405345-07660af7-245b-4115-813e-db56570b51c1.png" />
+<br>
+<img width=300 src="https://user-images.githubusercontent.com/20311086/204405505-507a406d-8125-4fdc-b0cb-709a9b32d0fa.png" />
+<img width=300 src="https://user-images.githubusercontent.com/20311086/204405847-f88bd9c7-fc9f-4a8d-9042-55a530b13d28.png" />
+</details>
+<details>
+<summary><code>colors</code></summary>
+<img width=400 src="https://user-images.githubusercontent.com/20311086/201162102-163788cd-9231-4cfe-81a9-661c24b7a22a.png" />
+</details>
