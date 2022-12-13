@@ -50,20 +50,29 @@ def add_to_db(guild, channels):
         return db[guild.id]
 
 
-class Publisher(commands.Cog):
+class AutoPublisher(commands.Cog):
     settings = []
 
     def __init__(self, bot, guilds=None):
         self.bot = bot
+
         logger.info(f"Registering /publisher" + (f" on {len(guilds)} guilds" if guilds else " globally"))
 
-        bot.add_application_command(
-            discord.SlashCommand(
-                self.CommandCallback,
-                name="publisher",
-                description="Configure auto-publishing settings for Announcement channels",
-            )
-        )
+    @commands.slash_command()
+    async def publisher(self, ctx):
+        """
+        Configure auto-publishing settings for Announcement channels
+        """
+        if not ctx.channel.permissions_for(ctx.user).manage_channels:
+            return await ctx.respond("*You need the **Manage Channels** permission to use this command*")
+
+        with SqliteDict("publisher.sqlite", tablename=str(ctx.guild.id)) as db:
+            if ctx.guild.id in db:
+                self.settings = db[ctx.guild.id]
+
+        message = self.Message(ctx)
+
+        await ctx.respond(**message, ephemeral=True)
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -82,18 +91,6 @@ class Publisher(commands.Cog):
             logger.info(f'Publishing message from "{message.channel.name}"')
             await message.publish()
 
-    async def CommandCallback(self, ctx):
-        """
-        Responds to /publisher
-        """
-        with SqliteDict("publisher.sqlite", tablename=str(ctx.guild.id)) as db:
-            if ctx.guild.id in db:
-                self.settings = db[ctx.guild.id]
-
-        message = self.Message(ctx)
-
-        await ctx.respond(**message, ephemeral=True)
-
     def Message(self, ctx):
         """
         Assemble the message (content, embed, and/or view)
@@ -101,18 +98,22 @@ class Publisher(commands.Cog):
         content = ""
         channels = []
         i = 1
+
         for c in ctx.guild.text_channels:
             if c.is_news():
                 channels += [c]
                 content += f"{EMOJI[i]} —  "
+
                 if c.id in self.settings:
                     content += YES_EMOJI
                 else:
                     content += NO_EMOJI
+
                 content += f" <#{c.id}>\n"
                 i += 1
 
         self.channels = channels
+
         view = View(self, ctx)
 
         if len(channels) == 0:

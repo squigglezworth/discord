@@ -193,7 +193,7 @@ bot.add_cog(colors.Colors(bot, color_prefix, GUILDS))
 db = "sqlite:///imdb.sqlite"
 bot.add_cog(imdb.Imdb(bot, db=db))
 bot.add_cog(memes.Memes(bot, GUILDS))
-bot.add_cog(publisher.Publisher(bot, GUILDS))
+bot.add_cog(publisher.AutoPublisher(bot, GUILDS))
 
 
 class Button(discord.ui.Button):
