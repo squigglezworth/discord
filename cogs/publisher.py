@@ -5,7 +5,9 @@ from sqlitedict import SqliteDict
 
 logger = logging.getLogger("bot.publisher")
 
-emotes = [
+YES_EMOJI = "<:yes:1039720761767768204>"
+NO_EMOJI = "<:no:1039720760652079224>"
+EMOJI = [
     "<:0:1051949928143925279>",
     "<:1:1051949989984747610>",
     "<:2:1051949939208499291>",
@@ -102,11 +104,11 @@ class Publisher(commands.Cog):
         for c in ctx.guild.text_channels:
             if c.is_news():
                 channels += [c]
-                content += f"{emotes[i]} —  "
+                content += f"{EMOJI[i]} —  "
                 if c.id in self.settings:
-                    content += "<:yes:1039720761767768204>"
+                    content += YES_EMOJI
                 else:
-                    content += "<:no:1039720760652079224>"
+                    content += NO_EMOJI
                 content += f" <#{c.id}>\n"
                 i += 1
 
