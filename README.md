@@ -32,7 +32,7 @@
 <details>
   <summary><i><a href="cogs/publisher.py"><b><code>publisher</code></b></a> - Automagically publish messages from <a href="https://support.discord.com/hc/en-us/articles/360032008192-Announcement-Channels-">Announcement</a> channels</i></summary>
 
-  - There are currently no permissions checks; disable access through your server's Integration settings
+  - Currently requires the `Manage Channels` permission to use
   - You may have to replace the emojis on [`cogs/publisher.py#L8-L22`](cogs/publisher.py#L8-L22)
   - To use, simply import and register the cog
   - This will register `/publisher`
