@@ -9,11 +9,6 @@
   - Allow only a single role per menu (e.g. for letting the user choose a role icon role)
   - To use, see [`main.py#L4-L117`](main.py#L4-L117) for how to define menus, then import roles and call `roles.Roles()`
   - This will register at least 1 new command based on the settings provided
-  ```python
-  from cogs import roles
-  role_settings = { ... }
-  roles.Roles(bot, role_settings)
-  ```
   <hr>
 </details>
 <details>
@@ -23,10 +18,6 @@
   - The cog will build a simple menu for users based on these rules
   - To use, simply add some color roles to your server, then import & add the cog
   - This will register `/colors`
-```python
-from cogs import colors
-bot.add_cog(colors.Colors(bot, "[C]"))
-```
 <hr>
 </details>
 <details>
@@ -36,10 +27,14 @@ bot.add_cog(colors.Colors(bot, "[C]"))
   - Search by name or provide an ID
   - To use, just import and add the cog
   - This will register `/imdb`
-  ```python
-  from cogs import imdb
-  bot.add_cog(imdb.Imdb(bot))
-  ```
+  <hr>
+</details>
+<details>
+  <summary><i><a href="cogs/publisher.py"><b><code>publisher</code></b></a> - Automagically publish messages from <a href="https://support.discord.com/hc/en-us/articles/360032008192-Announcement-Channels-">Announcement</a> channels</i></summary>
+
+  - There are currently no permissions checks; disable access through your server's Integration settings
+  - To use, simply import and register the cog
+  - This will register `/publisher`
   <hr>
 </details>
 
