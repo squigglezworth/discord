@@ -1,4 +1,4 @@
-imdb.sqlite
+*.sqlite
 s32cinemagoer.py
 # Byte-compiled / optimized / DLL files
 __pycache__/
