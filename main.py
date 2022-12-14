@@ -181,7 +181,9 @@ load_dotenv()
 TOKEN = os.getenv("DEBUG_TOKEN") if os.getenv("DEBUG") == "True" else os.getenv("PROD_TOKEN")
 GUILDS = [int(g) for g in os.getenv("GUILDS").split(",")] if os.getenv("GUILDS") else []
 
-bot = discord.Bot(debug_guilds=GUILDS)
+intents = discord.Intents.default()
+intents.guilds = True
+bot = discord.Bot(intents=intents, debug_guilds=GUILDS)
 
 # Register role menus
 roles = roles.Roles(bot, role_settings)
@@ -263,6 +265,11 @@ async def on_application_command(ctx):
 @bot.event
 async def on_ready():
     logger.info(f"Logged in as {bot.user} on {len(bot.guilds)} guilds")
+
+
+@bot.event
+async def on_guild_join(guild):
+    logger.info(f'Joined guild "{guild.name}"')
 
 
 bot.run(TOKEN)
