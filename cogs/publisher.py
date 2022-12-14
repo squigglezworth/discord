@@ -101,7 +101,13 @@ class AutoPublisher(commands.Cog):
 
         for c in ctx.guild.text_channels:
             if c.is_news():
-                channels += [c]
+                perms = c.permissions_for(ctx.me)
+                if perms.manage_messages and perms.send_messages:
+                    channel = [c, 1]
+                else:
+                    channel = [c, 0]
+                channels += [channel]
+
                 content += f"{EMOJI[i]} —  "
 
                 if c.id in self.settings:
@@ -109,7 +115,10 @@ class AutoPublisher(commands.Cog):
                 else:
                     content += NO_EMOJI
 
-                content += f" <#{c.id}>\n"
+                content += f" <#{c.id}>"
+                if not channel[1]:
+                    content += " \* *Missing permissions for this channel*"
+                content += "\n"
                 i += 1
 
         self.channels = channels
@@ -121,7 +130,8 @@ class AutoPublisher(commands.Cog):
             # Remove Enable/Disable buttons
             view.children = []
 
-        return {"content": content, "view": view}
+        embed = discord.Embed(description=content, color=0x0299AFF)
+        return {"embed": embed, "view": view}
 
 
 class View(discord.ui.View):
@@ -137,26 +147,26 @@ class View(discord.ui.View):
         self.channels = cog.channels
 
         for i, c in enumerate(self.channels):
-            self.add_item(ChannelButton(i + 1, cog))
+            self.add_item(ChannelButton(i + 1, ctx, cog))
 
-    @discord.ui.button(label="Set for All", style=discord.ButtonStyle.success)
+    @discord.ui.button(label="Enable for All", style=discord.ButtonStyle.success)
     async def EnableButton(self, button, interaction):
         logger.info("Enabling auto-publishing for all channels")
 
-        settings = add_to_db(self.ctx.guild, [c.id for c in self.channels])
+        settings = add_to_db(self.ctx.guild, [c[0].id for c in self.channels])
         self.cog.settings = settings
 
-        message = self.cog.Message(interaction)
+        message = self.cog.Message(self.ctx)
         await interaction.response.edit_message(**message)
 
     @discord.ui.button(label="Disable for All", style=discord.ButtonStyle.red)
     async def DisableButton(self, button, interaction):
         logger.info("Disabling auto-publishing for all channels")
 
-        settings = remove_from_db(self.ctx.guild, [c.id for c in self.channels])
+        settings = remove_from_db(self.ctx.guild, [c[0].id for c in self.channels])
         self.cog.settings = settings
 
-        message = self.cog.Message(interaction)
+        message = self.cog.Message(self.ctx)
         await interaction.response.edit_message(**message)
 
 
@@ -165,13 +175,19 @@ class ChannelButton(discord.ui.Button):
     Handles button clicks to toggle specific channels
     """
 
-    def __init__(self, index, cog):
+    def __init__(self, index, ctx, cog):
+        self.ctx = ctx
         self.cog = cog
 
-        super().__init__(custom_id=str(index), label=str(index), style=discord.ButtonStyle.grey, row=math.ceil(index / 5))
+        channel = cog.channels[index - 1][0]
+        style = discord.ButtonStyle.green
+        if channel.id in self.cog.settings:
+            style = discord.ButtonStyle.red
+
+        super().__init__(custom_id=str(index), label=str(index), style=style, row=math.ceil(index / 5))
 
     async def callback(self, interaction):
-        channel = self.cog.channels[int(interaction.custom_id) - 1]
+        channel = self.cog.channels[int(interaction.custom_id) - 1][0]
         logger.info(f'Toggling "{channel.name}"')
 
         if channel.id in self.cog.settings:
@@ -181,5 +197,5 @@ class ChannelButton(discord.ui.Button):
             settings = add_to_db(interaction.guild, [channel.id])
             self.cog.settings = settings
 
-        message = self.cog.Message(interaction)
+        message = self.cog.Message(self.ctx)
         await interaction.response.edit_message(**message)

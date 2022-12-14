@@ -161,7 +161,7 @@ import discord, os, re, logging
 from dotenv import load_dotenv
 from discord.ext import commands
 
-from cogs import colors, memes, imdb, roles
+from cogs import colors, memes, imdb, roles, publisher
 
 # Setup logging formatter & stream handler
 formatter = logging.Formatter(f"%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -193,6 +193,7 @@ bot.add_cog(colors.Colors(bot, color_prefix, GUILDS))
 db = "sqlite:///imdb.sqlite"
 bot.add_cog(imdb.Imdb(bot, db=db))
 bot.add_cog(memes.Memes(bot, GUILDS))
+bot.add_cog(publisher.AutoPublisher(bot))
 
 
 class Button(discord.ui.Button):
