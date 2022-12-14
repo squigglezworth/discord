@@ -64,7 +64,7 @@ class AutoPublisher(commands.Cog):
         Configure auto-publishing settings for Announcement channels
         """
         if not ctx.channel.permissions_for(ctx.user).manage_channels:
-            return await ctx.respond("*You need the **Manage Channels** permission to use this command*")
+            return await ctx.respond("*You need the **Manage Channels** permission to use this command*", ephemeral=True)
 
         with SqliteDict("publisher.sqlite", tablename=str(ctx.guild.id)) as db:
             if ctx.guild.id in db:
