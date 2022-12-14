@@ -5,8 +5,8 @@ from sqlitedict import SqliteDict
 
 logger = logging.getLogger("bot.publisher")
 
-YES_EMOJI = "<:yes:1039720761767768204>"
-NO_EMOJI = "<:no:1039720760652079224>"
+YES_EMOJI = "<:yes:1052475891235692544>"
+NO_EMOJI = "<:no:1052475925759008778>"
 EMOJI = [
     "<:0:1051949928143925279>",
     "<:1:1051949989984747610>",
