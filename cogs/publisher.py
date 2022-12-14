@@ -53,7 +53,7 @@ def add_to_db(guild, channels):
 class AutoPublisher(commands.Cog):
     settings = []
 
-    def __init__(self, bot, guilds=None):
+    def __init__(self, bot):
         self.bot = bot
 
         logger.info(f"Registering /publisher")

@@ -5,11 +5,11 @@ logger = logging.getLogger("bot.colors")
 
 
 class Colors(commands.Cog):
-    def __init__(self, bot, prefix, guilds=None):
+    def __init__(self, bot, prefix):
         self.bot = bot
         self.prefix = prefix
 
-        logger.info(f"Registering /colors" + (f" on {len(guilds)} guilds" if guilds else " globally"))
+        logger.info(f"Registering /colors")
 
         command = discord.SlashCommand(
             self.CommandCallback,

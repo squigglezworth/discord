@@ -53,9 +53,9 @@ def get_movie(result, db=None):
 
 
 class Imdb(commands.Cog):
-    def __init__(self, bot, db=None, guilds=None):
+    def __init__(self, bot, db=None):
         self.db = db
-        logger.info(f"Registering /imdb" + (f" on {len(guilds)} guilds" if guilds else " globally"))
+        logger.info(f"Registering /imdb")
 
         bot.add_application_command(
             discord.SlashCommand(

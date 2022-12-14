@@ -188,11 +188,11 @@ roles = roles.Roles(bot, role_settings)
 
 # Prefix your color roles with [C] (or change the prefix)
 color_prefix = "[C]"
-bot.add_cog(colors.Colors(bot, color_prefix, GUILDS))
+bot.add_cog(colors.Colors(bot, color_prefix))
 
 db = "sqlite:///imdb.sqlite"
 bot.add_cog(imdb.Imdb(bot, db=db))
-bot.add_cog(memes.Memes(bot, GUILDS))
+bot.add_cog(memes.Memes(bot))
 bot.add_cog(publisher.AutoPublisher(bot))
 
 
@@ -246,7 +246,7 @@ async def customize(ctx):
     await ctx.respond(ephemeral=True, embed=embed, view=view)
 
 
-logger.info(f"Registering /customize" + (f" on {len(GUILDS)} guilds" if GUILDS else " globally"))
+logger.info(f"Registering /customize")
 command = discord.SlashCommand(
     customize,
     description="Personalize your presence in the server - change the color of your name, add an icon, and more!",

@@ -627,12 +627,12 @@ class Memes(commands.Cog):
 
         await ctx.respond(ephemeral=True, embed=embed, view=view)
 
-    def __init__(self, bot, guilds=None):
+    def __init__(self, bot):
         self.bot = bot
         global memes
         self.memes = memes
 
-        logger.info(f"Registering /memes" + (f" on {len(guilds)} guilds" if guilds else " globally"))
+        logger.info(f"Registering /memes")
 
         command = discord.SlashCommand(self.CommandCallback, name="memes", description="shitpost")
         bot.add_application_command(command)
