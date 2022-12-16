@@ -19,64 +19,43 @@ class listener(ProcessStateMonitor):
         ["PROCESS_STATE_STOPPED", "STOPPED"],
         ["PROCESS_STATE_UNKNOWN", "UNKNOWN"],
     ]
-
-    def chunk(self, notifications, n=10):
-        for i in range(0, len(notifications), n):
-            yield notifications[i : i + n]
-
-    def send_notifications(self, notifications):
-        """
-        Send a notification to a webhook
-        Chunks up to 10 embeds per message
-        """
-        FORMATS = {
-            "PROCESS_STATE_STARTING": {
-                "description": "`{processname}` on `{hostname}` is **starting**...",
-                "color": 0x0C0FFAB,
-            },
-            "PROCESS_STATE_RUNNING": {
-                "description": "`{processname}` on `{hostname}` is now **running**!",
-                "author": {"name": "Running!", "url": "", "icon_url": "https://cdn.discordapp.com/attachments/666629290024108085/1053169984685211678/check.png"},
-                "color": 0x08FFF69,
-            },
-            "PROCESS_STATE_BACKOFF": {
-                "description": "`{processname}` on `{hostname}` failed. **Restarting**...",
-                "color": 0x0949494,
-            },
-            "PROCESS_STATE_STOPPING": {
-                "description": "`{processname}` on `{hostname}` is **stopping**...",
-                "color": 0x0F29D9D,
-            },
-            "PROCESS_STATE_FATAL": {
-                "description": "`{processname}` on `{hostname}` **failed to restart!**",
-                "color": 0x0FF0000,
-            },
-            "PROCESS_STATE_EXITED": {
-                "description": "`{processname}` on `{hostname}` **exited!**",
-                "color": 0x0FF0000,
-            },
-            "PROCESS_STATE_STOPPED": {
-                "description": "`{processname}` on `{hostname}` has **stopped!**",
-                "author": {"name": "Stopped!", "url": "", "icon_url": "https://cdn.discordapp.com/attachments/666629290024108085/1053171912873873438/circle865.png"},
-                "color": 0x0FF0000,
-            },
-            "PROCESS_STATE_UNKNOWN": {
-                "description": "`{processname}` on `{hostname}`: ***Unknown state! Uh oh!***",
-                "color": 0x0FF0000,
-            },
-        }
-
-        webhook = SyncWebhook.from_url(self.webhook)
-
-        for n in list(self.chunk(notifications)):
-            embeds = []
-            for e in n:
-                info = {"processname": e[0], "hostname": e[1], "eventname": e[2], "from_state": e[3]}
-                embed = Embed.from_dict(FORMATS[e[2]])
-                embed.description.format(**info)
-                embeds += [embed]
-
-            webhook.send(embeds=embeds, username="Supervisor Status")
+    EMBEDS = {
+        # Provide a dict in the form of a Discord Embed Object - https://discord.com/developers/docs/resources/channel#embed-object
+        "PROCESS_STATE_STARTING": {
+            "description": "`{processname}` on `{hostname}` is **starting**...",
+            "color": 0x0C0FFAB,
+        },
+        "PROCESS_STATE_RUNNING": {
+            "description": "`{processname}` on `{hostname}` is now **running**!",
+            "author": {"name": "Running!", "url": "", "icon_url": "https://cdn.discordapp.com/attachments/666629290024108085/1053169984685211678/check.png"},
+            "color": 0x08FFF69,
+        },
+        "PROCESS_STATE_BACKOFF": {
+            "description": "`{processname}` on `{hostname}` failed. **Restarting**...",
+            "color": 0x0949494,
+        },
+        "PROCESS_STATE_STOPPING": {
+            "description": "`{processname}` on `{hostname}` is **stopping**...",
+            "color": 0x0F29D9D,
+        },
+        "PROCESS_STATE_FATAL": {
+            "description": "`{processname}` on `{hostname}` **failed to restart!**",
+            "color": 0x0FF0000,
+        },
+        "PROCESS_STATE_EXITED": {
+            "description": "`{processname}` on `{hostname}` **exited!**",
+            "color": 0x0FF0000,
+        },
+        "PROCESS_STATE_STOPPED": {
+            "description": "`{processname}` on `{hostname}` has **stopped!**",
+            "author": {"name": "Stopped!", "url": "", "icon_url": "https://cdn.discordapp.com/attachments/666629290024108085/1053171912873873438/circle865.png"},
+            "color": 0x0FF0000,
+        },
+        "PROCESS_STATE_UNKNOWN": {
+            "description": "`{processname}` on `{hostname}`: ***Unknown state! Uh oh!***",
+            "color": 0x0FF0000,
+        },
+    }
 
     def __init__(self, **args):
         self.webhook = args.get("webhook")
@@ -100,6 +79,28 @@ class listener(ProcessStateMonitor):
         self.process_state_events = [e[0] for e in self.EVENTS]
         if args.get("events"):
             self.process_state_events = ["PROCESS_STATE_{}".format(e.strip().upper()) for e in args.get("events") if e in [e[1] for e in self.EVENTS]]
+
+    def chunk(self, notifications, n=10):
+        for i in range(0, len(notifications), n):
+            yield notifications[i : i + n]
+
+    def send_notifications(self, notifications):
+        """
+        Send a notification to a webhook
+        Chunks up to 10 embeds per message
+        """
+
+        webhook = SyncWebhook.from_url(self.webhook)
+
+        for n in list(self.chunk(notifications)):
+            embeds = []
+            for e in n:
+                info = {"processname": e[0], "hostname": e[1], "eventname": e[2], "from_state": e[3]}
+                embed = Embed.from_dict(self.EMBEDS[e[2]])
+                embed.description.format(**info)
+                embeds += [embed]
+
+            webhook.send(embeds=embeds, username="Supervisor Status")
 
     def send_batch_notification(self):
         """
