@@ -88,14 +88,14 @@ class AutoPublisher(commands.Cog):
                     self.settings = db[message.guild.id]
 
         if message.channel.id in self.settings:
-            logger.info(f'Publishing message from "{message.channel.name}" on "{message.guild.name}"')
+            logger.info(f"Publishing message from '{message.channel.name}' on '{message.guild.name}'")
 
             try:
                 await message.publish()
             except discord.Forbidden:
-                logger.warning(f'Missing permissions for "{message.channel.name}" on "{message.guild.name}"')
+                logger.warning(f"Missing permissions for '{message.channel.name}' on '{message.guild.name}'")
             except dicsord.HTTPException:
-                logger.warning(f'Publishing failed for "{message.channel.name}" on "{message.guild.name}"')
+                logger.warning(f"Publishing failed for '{message.channel.name}' on '{message.guild.name}'")
 
     def Message(self, ctx):
         """
@@ -157,7 +157,7 @@ class View(discord.ui.View):
 
     @discord.ui.button(label="Enable for All", style=discord.ButtonStyle.success)
     async def EnableButton(self, button, interaction):
-        logger.info(f"Enabling auto-publishing for all channels on {self.ctx.guild.name}")
+        logger.info(f"Enabling auto-publishing for all channels on '{self.ctx.guild.name}'")
 
         settings = add_to_db(self.ctx.guild, [c[0].id for c in self.channels])
         self.cog.settings = settings
@@ -167,7 +167,7 @@ class View(discord.ui.View):
 
     @discord.ui.button(label="Disable for All", style=discord.ButtonStyle.red)
     async def DisableButton(self, button, interaction):
-        logger.info(f"Disabling auto-publishing for all channels on {self.ctx.guild.name}")
+        logger.info(f"Disabling auto-publishing for all channels on '{self.ctx.guild.name}'")
 
         settings = remove_from_db(self.ctx.guild, [c[0].id for c in self.channels])
         self.cog.settings = settings
@@ -194,7 +194,7 @@ class ChannelButton(discord.ui.Button):
 
     async def callback(self, interaction):
         channel = self.cog.channels[int(interaction.custom_id) - 1][0]
-        logger.info(f'Toggling "{channel.name}" on "{channel.guild.name}"')
+        logger.info(f"Toggling publishing for '{channel.name}' on '{channel.guild.name}'")
 
         if channel.id in self.cog.settings:
             settings = remove_from_db(interaction.guild, [channel.id])

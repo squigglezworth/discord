@@ -30,17 +30,17 @@ bot.add_cog(publisher.AutoPublisher(bot))
 @bot.event
 async def on_application_command(ctx):
     logger = logging.getLogger(f"bot.{ctx.command}")
-    logger.info(f"Responding to {ctx.user} on {ctx.guild.name}")
+    logger.info(f"Responding to '{ctx.user}' on '{ctx.guild.name}'")
 
 
 @bot.event
 async def on_ready():
-    logger.info(f"Logged in as {bot.user} on {len(bot.guilds)} guilds")
+    logger.info(f"Logged in as '{bot.user}' on {len(bot.guilds)} guilds")
 
 
 @bot.event
 async def on_guild_join(guild):
-    logger.info(f'Joined guild "{guild.name}"')
+    logger.info(f"Joined guild '{guild.name}'")
 
 
 bot.run(PUBLISHER_TOKEN)
