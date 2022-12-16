@@ -1,0 +1,3 @@
+[submodule "supervisor"]
+	path = supervisor
+	url = https://github.com/squigglezworth/supervisor-discord-listener
