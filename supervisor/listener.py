@@ -20,25 +20,63 @@ class listener(ProcessStateMonitor):
         ["PROCESS_STATE_UNKNOWN", "UNKNOWN"],
     ]
 
-    def send_notifcation(self, processname, hostname, eventname, from_state):
+    def chunk(self, notifications, n=10):
+        for i in range(0, len(notifications), n):
+            yield notifications[i : i + n]
+
+    def send_notifications(self, notifications):
         """
         Send a notification to a webhook
+        Chunks up to 10 embeds per message
         """
         FORMATS = {
-            "PROCESS_STATE_STARTING": [f"`{processname}` on `{hostname}` is **starting**...", 0x0C0FFAB],
-            "PROCESS_STATE_RUNNING": [f"`{processname}` on `{hostname}` is now **running**!", 0x08FFF69],
-            "PROCESS_STATE_BACKOFF": [f"`{processname}` on `{hostname}` failed. **Restarting**...", 0x0949494],
-            "PROCESS_STATE_STOPPING": [f"`{processname}` on `{hostname}` is **stopping**...", 0x0F29D9D],
-            "PROCESS_STATE_FATAL": [f"`{processname}` on `{hostname}`: **Failed to restart!**", 0x0FF0000],
-            "PROCESS_STATE_EXITED": [f"`{processname}` on `{hostname}` **exited!**", 0x0FF0000],
-            "PROCESS_STATE_STOPPED": [f"`{processname}` on `{hostname}` has **stopped!**", 0x0FF0000],
-            "PROCESS_STATE_UNKNOWN": [f"`{processname}` on `{hostname}`: ***Unknown state! Uh oh!***", 0x0FF0000],
+            "PROCESS_STATE_STARTING": {
+                "description": "`{processname}` on `{hostname}` is **starting**...",
+                "color": 0x0C0FFAB,
+            },
+            "PROCESS_STATE_RUNNING": {
+                "description": "`{processname}` on `{hostname}` is now **running**!",
+                "author": {"name": "Running!", "url": "", "icon_url": "https://cdn.discordapp.com/attachments/666629290024108085/1053169984685211678/check.png"},
+                "color": 0x08FFF69,
+            },
+            "PROCESS_STATE_BACKOFF": {
+                "description": "`{processname}` on `{hostname}` failed. **Restarting**...",
+                "color": 0x0949494,
+            },
+            "PROCESS_STATE_STOPPING": {
+                "description": "`{processname}` on `{hostname}` is **stopping**...",
+                "color": 0x0F29D9D,
+            },
+            "PROCESS_STATE_FATAL": {
+                "description": "`{processname}` on `{hostname}` **failed to restart!**",
+                "color": 0x0FF0000,
+            },
+            "PROCESS_STATE_EXITED": {
+                "description": "`{processname}` on `{hostname}` **exited!**",
+                "color": 0x0FF0000,
+            },
+            "PROCESS_STATE_STOPPED": {
+                "description": "`{processname}` on `{hostname}` has **stopped!**",
+                "author": {"name": "Stopped!", "url": "", "icon_url": "https://cdn.discordapp.com/attachments/666629290024108085/1053171912873873438/circle865.png"},
+                "color": 0x0FF0000,
+            },
+            "PROCESS_STATE_UNKNOWN": {
+                "description": "`{processname}` on `{hostname}`: ***Unknown state! Uh oh!***",
+                "color": 0x0FF0000,
+            },
         }
 
-        embed = Embed(description=FORMATS[eventname][0], color=FORMATS[eventname][1])
         webhook = SyncWebhook.from_url(self.webhook)
 
-        webhook.send(embed=embed, username="Supervisor Status")
+        for n in list(self.chunk(notifications)):
+            embeds = []
+            for e in n:
+                info = {"processname": e[0], "hostname": e[1], "eventname": e[2], "from_state": e[3]}
+                embed = Embed.from_dict(FORMATS[e[2]])
+                embed.description.format(**info)
+                embeds += [embed]
+
+            webhook.send(embeds=embeds, username="Supervisor Status")
 
     def __init__(self, **args):
         self.webhook = args.get("webhook")
@@ -68,15 +106,17 @@ class listener(ProcessStateMonitor):
         Overrde ProcessStateMonitor function
         Determine whether to send any waiting notifications
         """
+        notifications = []
         for msg in self.batchmsgs:
             hostname, processname, from_state, eventname = msg.rsplit(";")
             processname = processname.split(":")[0]
             if processname in self.process_whitelist or "ALL" in self.process_whitelist:
-                self.send_notifcation(processname, hostname, eventname, from_state)
+                notifications.append([processname, hostname, eventname, from_state])
             elif processname in self.process_blacklist or "ALL" in self.process_blacklist:
                 return
             else:
-                self.send_notifcation(processname, hostname, eventname, from_state)
+                notifications.append([processname, hostname, eventname, from_state])
+        self.send_notifications(notifications)
 
     def get_process_state_change_msg(self, headers, payload):
         pheaders, pdata = childutils.eventdata(payload + "\n")
