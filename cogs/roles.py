@@ -1,4 +1,7 @@
-import discord, re, random, logging
+import discord
+import re
+import random
+import logging
 from random import shuffle
 from discord.ext import commands
 
