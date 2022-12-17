@@ -1,3 +1,11 @@
+import logging
+import re
+import os
+import discord
+from cogs import colors, memes, roles, publisher
+from discord.ext import commands
+from dotenv import load_dotenv
+
 role_settings = {
     "roles": {
         "name": "roles",
@@ -157,11 +165,7 @@ role_settings = {
         ],
     },
 }
-import discord, os, re, logging
-from dotenv import load_dotenv
-from discord.ext import commands
 
-from cogs import colors, memes, imdb, roles, publisher
 
 # Setup logging formatter & stream handler
 formatter = logging.Formatter(f"%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -192,8 +196,6 @@ roles = roles.Roles(bot, role_settings)
 color_prefix = "[C]"
 bot.add_cog(colors.Colors(bot, color_prefix))
 
-db = "sqlite:///imdb.sqlite"
-bot.add_cog(imdb.Imdb(bot, db=db))
 bot.add_cog(memes.Memes(bot))
 bot.add_cog(publisher.AutoPublisher(bot))
 
