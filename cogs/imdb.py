@@ -1,131 +1,55 @@
-import discord, re, logging
+import discord
+import re
+import logging
+import sqlite3
 from discord.ext import commands
-from imdb import Cinemagoer, IMDbError
-from retry import retry
+from imdb import Cinemagoer
 
 logger = logging.getLogger("bot.imdb")
 
 
-@retry(tries=5)
-def search_movie(search, db=None):
-    if db:
-        logger.info(f"Searching for {search} using sqlite ...")
-        imdb = Cinemagoer("s3", db)
-    else:
-        logger.info(f"Searching for {search} ...")
-        imdb = Cinemagoer()
-
-    results = imdb.search_movie(search, results=5)
-
-    # Sometimes it returns an empty list!
-    if not len(results):
-        # Raise an exception so @retry can do its thing
-        raise IMDbError
-    else:
-        logger.info("Done!")
-        return results
-
-
-@retry(tries=5)
-def update_movie(result, db=None):
-    if db:
-        logger.info(f"Updating info for {result} using sqlite ...")
-        imdb = Cinemagoer("s3", db)
-    else:
-        logger.info(f"Updating info for {result} ...")
-        imdb = Cinemagoer()
-
-    logger.info(f"Done!")
-    return imdb.update(result)
-
-
-@retry(tries=5)
-def get_movie(result, db=None):
-    if db:
-        logger.info(f"Getting info for {result} using sqlite ...")
-        imdb = Cinemagoer("s3", db)
-    else:
-        logger.info(f"Getting info for {result} ...")
-        imdb = Cinemagoer()
-
-    logger.info(f"Done!")
-    return imdb.get_movie(result)
-
-
 class Imdb(commands.Cog):
-    def __init__(self, bot, db=None):
+    def __init__(self, bot, db):
+        logger.info("Preparing /imdb...")
+        self.bot = bot
         self.db = db
-        logger.info(f"Registering /imdb")
+
+        stmt = """
+        SELECT primaryTitle, startYear, title_basics.tconst, numVotes
+        FROM title_basics
+        LEFT JOIN title_ratings ON title_basics.tconst = title_ratings.tconst
+        WHERE numVotes > 0
+        ORDER BY numVotes DESC
+        """
+        con = sqlite3.connect(db[10:])
+        cur = con.execute(stmt)
+        results = cur.fetchall()
+
+        titles = [[f"{r[0]} - {r[1]}", r[2]] for r in results]
+        self.titles = titles
+
+        option = discord.Option(str, name="search", description="What to search for. Begin typing to search, or enter an IMDb ID (e.g. tt0133093, 0133093)", autocomplete=self.imdb_autocomplete)
 
         bot.add_application_command(
             discord.SlashCommand(
-                self.CommandCallback,
+                self.imdb,
                 name="imdb",
                 description="Look stuff up on IMDb",
-                options=[
-                    discord.Option(
-                        str,
-                        name="search",
-                        description="What to search for. Enter a movie/TV show name or an IMDb ID (e.g. 'The Matrix', tt0133093, 0133093)",
-                    )
-                ],
+                options=[option],
             )
         )
 
-    async def CommandCallback(self, ctx, search: str):
+        logger.info(f"Registering /imdb")
+
+    async def imdb(self, ctx, search):
+        await ctx.interaction.response.defer()
         if re.match("^\d+$", search.lstrip("tt")):
-            # Handle IMDb IDs (tt1234567, 1234567)
-            await ctx.interaction.response.defer(ephemeral=False)
-
-            self.results = [get_movie(search.lstrip("tt"))]
-            content = f"<@{ctx.user.id}>"
-        else:
-            # Handle a normal search
-            await ctx.interaction.response.defer(ephemeral=True)
-
-            try:
-                self.results = search_movie(search, self.db)
-            except:
-                self.results = []
-            content = ""
-
-        embed, view = self.Message(ctx, self)
-
-        await ctx.respond(content=content, embed=embed, view=view)
-
-    def Message(self, ctx, cog):
-        embed = discord.Embed(color=0x299AFF)
-        view = View(cog, ctx)
-        results = self.results
-
-        if len(results) > 1:
-            logger.info("Search found; letting user choose")
-
-            view = View(cog, ctx, results)
-            embed.description = "Select a movie to send in the current channel:\n"
-
-            for i, result in enumerate(results):
-                logger.info(f"Building embed for movie #{i+1}")
-
-                update_movie(result, self.db)
-
-                url = f"https://imdb.com/title/tt{result.movieID}"
-                embed.description += f"{i+1}) ***[{result}]({url})*** ({result['year']})"
-
-                if "creator" in result:
-                    embed.description += f" - *Created by: {result['creator'][0]['name']}*"
-                elif "director" in result:
-                    embed.description += f" - *Directed by: {result['director'][0]['name']}*"
-
-                embed.description += "\n"
-
-        elif len(results) == 1:
-            result = results[0]
-            # Even when an sqlite database is available, update the final result via the website
-            # Otherwise, the cover URL will not be available
-            update_movie(result)
+            imdb = Cinemagoer()
+            result = imdb.get_movie(search)
+            imdb.update(result)
 
             # Build the embed
+            embed = discord.Embed(color=0x299AFF)
             embed.title = f"***{result['title']}*** "
             if result["kind"] == "tv series":
                 embed.title += f"(TV show ∙ {result['series years']})"
@@ -165,44 +89,27 @@ class Imdb(commands.Cog):
                 text="Use /imdb to lookup TV/movies",
                 icon_url="https://cdn.discordapp.com/attachments/525755278172356625/1046961975416066118/image.png",
             )
+
+            await ctx.respond(embed=embed)
         else:
-            # If search_movie failed ...
-            embed.description = "Uh oh, something went wrong! Please let your admin know!"
+            await ctx.respond(ephemeral=True, content="Please select an option from the lsit, or provide an IMDb ID")
 
-        return embed, view
+    async def imdb_autocomplete(self, ctx):
+        await ctx.interaction.response.defer()
 
+        if len(ctx.value) == 0:
+            return ["Begin typing to search for a movie..."]
+        if len(ctx.value) < 5:
+            return ["Keep typing..."]
 
-class View(discord.ui.View):
-    def __init__(self, cog, ctx, results=[]):
-        super().__init__()
+        results = [r for r in self.titles if ctx.value in r[0]][:10]
 
-        # If there's only one result, we don't need any buttons
-        if len(results) > 1:
-            for i in range(0, 5):
-                self.add_item(Button(cog, ctx, i, results))
+        choices = []
+        for r in results:
+            choice = discord.OptionChoice(name=r[0][:100], value=str(r[1]))
+            choices += [choice]
 
-
-class Button(discord.ui.Button):
-    def __init__(self, cog, ctx, index, results):
-        self.cog = cog
-        self.ctx = ctx
-
-        super().__init__(
-            label=index + 1,
-            custom_id=str(results[index].movieID),
-            style=discord.ButtonStyle.success,
-        )
-
-    async def callback(self, interaction):
-        """
-        Callback for buttons
-        """
-
-        imdb = Cinemagoer()
-        result = imdb.get_movie(self.custom_id)
-        self.cog.results = [result]
-
-        embed, view = self.cog.Message(interaction, self.cog)
-
-        await self.ctx.channel.send(content=f"<@{self.ctx.user.id}>", embed=embed, view=view)
-        await self.ctx.delete()
+        if choices:
+            return choices
+        else:
+            return ["No results found! Make sure you spelled it right, or try entering an IMDb ID"]

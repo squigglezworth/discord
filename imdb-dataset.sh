@@ -12,6 +12,10 @@ wget -N -P /tmp/imdb-datasets/ \
 "https://datasets.imdbws.com/title.principals.tsv.gz" \
 "https://datasets.imdbws.com/title.ratings.tsv.gz"
 
-wget -N https://raw.githubusercontent.com/cinemagoer/cinemagoer/master/bin/s32cinemagoer.py
+wget -N https://raw.githubusercontent.com/squigglezworth/cinemagoer/master/bin/s32cinemagoer.py
 
-s32cinemagoer.py /tmp/imdb-datasets/ sqlite:///imdb.sqlite
+s32cinemagoer.py --cleanup /tmp/imdb-datasets/ sqlite:///imdb.tmp.sqlite
+
+mv imdb.tmp.sqlite imdb.sqlite
+
+rm -rf /tmp/imdb-datasets/
