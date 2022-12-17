@@ -23,10 +23,15 @@
 <details>
   <summary><i><a href="cogs/imdb.py"><b><code>imdb</code></b></a> - Simple IMDb lookup</i></summary>
 
-  - Consider building a local sqlite database using [`imdb-dataset.sh`](imdb-dataset.sh), as this will speed things up considerably
+  - This cog requires a local copy of the IMDb dataset. The DB takes up 10GB+ but is much faster and more reliable than not using one
+    - See [`imdb-dataset.sh`](imdb-dataset.sh) for an example of generating this
   - Search by name or provide an ID
-  - To use, just import and add the cog
+  - To use, make sure you generate an sqlite db, then import and add the cog
   - This will register `/imdb`
+  ```python
+  from cogs import imdb
+  bot.add_cog(imdb.Imdb(bot, db="sqlite:///imdb.sqlite"))
+  ```
   <hr>
 </details>
 <details>
