@@ -1,4 +1,4 @@
-import bot
+from .. import bot
 import discord
 import logging
 import os
