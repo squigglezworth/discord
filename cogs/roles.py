@@ -5,18 +5,17 @@ import logging
 from random import shuffle
 from discord.ext import commands
 
-logger = logging.getLogger("bot.roles")
-
 
 class Roles:
     def __init__(self, bot, settings):
         """
         Register commands according to the provided settings
         """
+        self.logger = logging.getLogger("bot.roles")
         self.settings = settings
 
         for c in settings:
-            logger.info(f"Registering /{c}")
+            bot.logger.info(f"Registering /{c}")
 
             command = discord.SlashCommand(
                 self.CommandCallback,

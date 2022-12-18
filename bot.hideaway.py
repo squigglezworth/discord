@@ -1,10 +1,10 @@
-import logging
-import re
-import os
+import bot
 import discord
-from cogs import colors, memes, roles, publisher
+import logging
+import os
 from discord.ext import commands
 from dotenv import load_dotenv
+from cogs import colors, memes, roles, publisher
 
 role_settings = {
     "roles": {
@@ -166,28 +166,13 @@ role_settings = {
     },
 }
 
-
-# Setup logging formatter & stream handler
-formatter = logging.Formatter(f"%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-formatter.default_msec_format = None
-ch = logging.StreamHandler()
-ch.setFormatter(formatter)
-# Attach handlers to loggers and set logging level
-logger = logging.getLogger("discord")
-logger.addHandler(ch)
-logger.setLevel(logging.WARNING)
-logger = logging.getLogger("bot")
-logger.addHandler(ch)
-logger.setLevel(logging.INFO)
-
 load_dotenv()
-
 TOKEN = os.getenv("DEBUG_TOKEN") if os.getenv("DEBUG") == "True" else os.getenv("PROD_TOKEN")
 GUILDS = [int(g) for g in os.getenv("GUILDS").split(",")] if os.getenv("GUILDS") else []
 
 intents = discord.Intents.default()
 intents.guilds = True
-bot = discord.Bot(intents=intents, debug_guilds=GUILDS)
+bot = bot.Bot("hideaway", intents=intents, debug_guilds=GUILDS)
 
 # Register role menus
 roles = roles.Roles(bot, role_settings)
@@ -227,9 +212,10 @@ class Button(discord.ui.Button):
         await interaction.response.edit_message(embed=embed, view=view)
 
 
+@commands.slash_command()
 async def customize(ctx):
     """
-    Callback for /customize command
+    Personalize your presence in the server - change the color of your name, add an icon, and more!
     """
     buttons = [
         ["🥐 Roles", "roles", discord.ButtonStyle.blurple],
@@ -250,28 +236,7 @@ async def customize(ctx):
     await ctx.respond(ephemeral=True, embed=embed, view=view)
 
 
-logger.info(f"Registering /customize")
-command = discord.SlashCommand(
-    customize,
-    description="Personalize your presence in the server - change the color of your name, add an icon, and more!",
-)
-bot.add_application_command(command)
-
-
-@bot.event
-async def on_application_command(ctx):
-    logger = logging.getLogger(f"bot.{ctx.command}")
-    logger.info(f"Responding to {ctx.user}")
-
-
-@bot.event
-async def on_ready():
-    logger.info(f"Logged in as {bot.user} on {len(bot.guilds)} guilds")
-
-
-@bot.event
-async def on_guild_join(guild):
-    logger.info(f'Joined guild "{guild.name}"')
+bot.logger.info(f"Registering /customize")
 
 
 bot.run(TOKEN)

@@ -1,15 +1,17 @@
-import discord, re, random, logging
+import discord
+import re
+import random
+import logging
 from discord.ext import commands
-
-logger = logging.getLogger("bot.colors")
 
 
 class Colors(commands.Cog):
     def __init__(self, bot, prefix):
+        bot.logger.info(f"Registering /colors")
+
+        self.logger = logging.getLogger("bot.colors")
         self.bot = bot
         self.prefix = prefix
-
-        logger.info(f"Registering /colors")
 
         command = discord.SlashCommand(
             self.CommandCallback,
@@ -83,7 +85,7 @@ class Colors(commands.Cog):
 
             for r in interaction.user.roles:
                 if pattern.match(r.name):
-                    logger.info(f"Removing color from {interaction.user}")
+                    self.logger.info(f"Removing color from {interaction.user}")
 
                     await interaction.user.remove_roles(r)
                     LastUpdate = [0, r]
@@ -92,12 +94,12 @@ class Colors(commands.Cog):
                 role = interaction.guild.get_role(int(r))
 
                 if role in interaction.user.roles:
-                    logger.info(f"Removing color from {interaction.user}")
+                    self.logger.info(f"Removing color from {interaction.user}")
 
                     await interaction.user.remove_roles(role)
                     LastUpdate = [0, role]
                 else:
-                    logger.info(f"Adding color to {interaction.user}")
+                    self.logger.info(f"Adding color to {interaction.user}")
 
                     await interaction.user.add_roles(role)
                     LastUpdate = [1, role]

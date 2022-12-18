@@ -5,12 +5,12 @@ import sqlite3
 from discord.ext import commands
 from imdb import Cinemagoer
 
-logger = logging.getLogger("bot.imdb")
-
 
 class Imdb(commands.Cog):
     def __init__(self, bot, db):
-        logger.info("Preparing /imdb...")
+        bot.logger.info("Preparing /imdb...")
+
+        self.logger = logging.getLogger("bot.imdb")
         self.bot = bot
         self.db = db
 
@@ -39,7 +39,7 @@ class Imdb(commands.Cog):
             )
         )
 
-        logger.info(f"Registering /imdb")
+        bot.logger.info(f"Registering /imdb")
 
     async def imdb(self, ctx, search):
         await ctx.interaction.response.defer()

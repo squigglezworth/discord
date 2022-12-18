@@ -1,9 +1,9 @@
-import math, logging
+import math
+import logging
 import discord
 from discord.ext import commands
 from sqlitedict import SqliteDict
 
-logger = logging.getLogger("bot.publisher")
 
 YES_EMOJI = "<:yes:1052475891235692544>"
 NO_EMOJI = "<:no:1052475925759008778>"
@@ -54,9 +54,10 @@ class AutoPublisher(commands.Cog):
     settings = []
 
     def __init__(self, bot):
-        self.bot = bot
+        bot.logger.info(f"Registering /publisher")
 
-        logger.info(f"Registering /publisher")
+        self.logger = logging.getLogger("bot.publisher")
+        self.bot = bot
 
     @commands.slash_command()
     async def publisher(self, ctx):
@@ -88,14 +89,14 @@ class AutoPublisher(commands.Cog):
                     self.settings = db[message.guild.id]
 
         if message.channel.id in self.settings:
-            logger.info(f"Publishing message from '{message.channel.name}' on '{message.guild.name}'")
+            self.logger.info(f"Publishing message from '{message.channel.name}' on '{message.guild.name}'")
 
             try:
                 await message.publish()
             except discord.Forbidden:
-                logger.warning(f"Missing permissions for '{message.channel.name}' on '{message.guild.name}'")
+                self.logger.warning(f"Missing permissions for '{message.channel.name}' on '{message.guild.name}'")
             except dicsord.HTTPException:
-                logger.warning(f"Publishing failed for '{message.channel.name}' on '{message.guild.name}'")
+                self.logger.warning(f"Publishing failed for '{message.channel.name}' on '{message.guild.name}'")
 
     def Message(self, ctx):
         """
@@ -157,7 +158,7 @@ class View(discord.ui.View):
 
     @discord.ui.button(label="Enable for All", style=discord.ButtonStyle.success)
     async def EnableButton(self, button, interaction):
-        logger.info(f"Enabling auto-publishing for all channels on '{self.ctx.guild.name}'")
+        self.cog.logger.info(f"Enabling auto-publishing for all channels on '{self.ctx.guild.name}'")
 
         settings = add_to_db(self.ctx.guild, [c[0].id for c in self.channels])
         self.cog.settings = settings
@@ -167,7 +168,7 @@ class View(discord.ui.View):
 
     @discord.ui.button(label="Disable for All", style=discord.ButtonStyle.red)
     async def DisableButton(self, button, interaction):
-        logger.info(f"Disabling auto-publishing for all channels on '{self.ctx.guild.name}'")
+        self.cog.logger.info(f"Disabling auto-publishing for all channels on '{self.ctx.guild.name}'")
 
         settings = remove_from_db(self.ctx.guild, [c[0].id for c in self.channels])
         self.cog.settings = settings
@@ -194,7 +195,7 @@ class ChannelButton(discord.ui.Button):
 
     async def callback(self, interaction):
         channel = self.cog.channels[int(interaction.custom_id) - 1][0]
-        logger.info(f"Toggling publishing for '{channel.name}' on '{channel.guild.name}'")
+        self.cog.logger.info(f"Toggling publishing for '{channel.name}' on '{channel.guild.name}'")
 
         if channel.id in self.cog.settings:
             settings = remove_from_db(interaction.guild, [channel.id])
