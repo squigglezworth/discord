@@ -7,17 +7,17 @@ class Bot(Bot):
         super().__init__()
 
         # Setup logging formatter & stream handler
-        formatter = logging.Formatter(f"%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-        formatter.default_msec_format = None
-        ch = logging.StreamHandler()
-        ch.setFormatter(formatter)
+        fmt = logging.Formatter(f"%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        fmt.default_msec_format = None
+        handler = logging.StreamHandler()
+        handler.setFormatter(fmt)
 
         # Attach handlers to loggers and set logging level
         logger = logging.getLogger("discord")
-        logger.addHandler(ch)
+        logger.addHandler(handler)
         logger.setLevel(logging.WARNING)
         logger = logging.getLogger(f"bot.{name}")
-        logger.addHandler(ch)
+        logger.addHandler(handler)
         logger.setLevel(logging.INFO)
 
         self.logger = logger
