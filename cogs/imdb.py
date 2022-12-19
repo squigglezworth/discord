@@ -10,7 +10,7 @@ class Imdb(commands.Cog):
     def __init__(self, bot, db):
         bot.logger.info("Preparing /imdb...")
 
-        self.logger = logging.getLogger("bot.imdb")
+        self.logger = bot.logger
         self.bot = bot
         self.db = db
 

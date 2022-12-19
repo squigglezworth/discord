@@ -23,8 +23,7 @@ class Bot(Bot):
         self.logger = logger
 
     async def on_application_command(self, ctx):
-        logger = logging.getLogger(f"bot.{ctx.command}")
-        logger.info(f"Responding to {ctx.user}")
+        self.logger.info(f"{ctx.command} - Responding to {ctx.user}")
 
     async def on_ready(self):
         self.logger.info(f"Logged in as {self.user} on {len(self.guilds)} guilds")

@@ -11,7 +11,7 @@ class Roles:
         """
         Register commands according to the provided settings
         """
-        self.logger = logging.getLogger("bot.roles")
+        self.logger = bot.logger
         self.settings = settings
 
         for c in settings:
@@ -42,8 +42,6 @@ class Roles:
             self.ctx = ctx
         else:
             ctx = self.ctx
-
-        self.logger = logging.getLogger(f"bot.roles.{ctx.command}")
 
         if not menu:
             menu = self.settings[str(ctx.command)]
@@ -99,7 +97,7 @@ class Roles:
                 try:
                     self.add_item(self.Dropdown(dropdown, self, cog))
                 except:
-                    cog.logger.warning("Couldn't build dropdown!")
+                    cog.logger.warning(f"{cog.ctx.command} - Couldn't build dropdown!")
 
             if self.children:
                 self.add_item(self.ClearButton(self, cog))
@@ -121,7 +119,7 @@ class Roles:
                     role = cog.ctx.guild.get_role(r[0])
 
                     if not role:
-                        cog.logger.warning(f"Role does not exist on server - {role}")
+                        cog.logger.warning(f"{cog.ctx.command} - Role does not exist on server - {role}")
                         continue
 
                     update = None
@@ -161,7 +159,7 @@ class Roles:
 
                     if role in user_roles:
                         # If the user already has the role, remove it
-                        self.cog.logger.info(f"Removing roles from {interaction.user} - {role}")
+                        self.cog.logger.info(f"{cog.ctx.command} - Removing roles from {interaction.user} - {role}")
 
                         updates += [0, role]
                         user_roles.remove(role)
@@ -170,7 +168,7 @@ class Roles:
                         # If the user doesn't have the role, add it
                         if self.View.menu["max_one"]:
                             # But first, if max_one is set, remove any other roles the user has from this menu
-                            self.cog.logger.info(f"max_one specified; removing all roles...")
+                            self.cog.logger.info(f"{cog.ctx.command} - max_one specified; removing all roles...")
 
                             roles = self.cog.menu_roles
 
@@ -190,7 +188,7 @@ class Roles:
                             )
                             await interaction.user.edit(roles=user_roles)
 
-                        self.cog.logger.info(f"Adding roles to {interaction.user} - {role}")
+                        self.cog.logger.info(f"{cog.ctx.command} - Adding roles to {interaction.user} - {role}")
 
                         # Prepare some info for refresh
                         updates += [1, role]
@@ -220,7 +218,7 @@ class Roles:
                 """
                 Callback for the clear button
                 """
-                self.cog.logger.info(f"Clearing all roles from {interaction.user}")
+                self.cog.logger.info(f"{cog.ctx.command} - Clearing all roles from {interaction.user}")
 
                 updates = []
                 for r in filter(lambda r: r.id in self.cog.menu_roles, interaction.user.roles):
