@@ -20,11 +20,13 @@ bot = bot.Bot("hideaway-debug", intents=intents, debug_guilds=GUILDS)
 # Setup webhook logging
 log_webhook = os.getenv("LOG_WEBHOOK")
 if log_webhook:
-    handler = WebhookHandler(log_webhook)
+    handler = WebhookHandler(log_webhook, color=0x0FF5338)
     fmt = logging.Formatter(f"%(name)s - %(levelname)s - %(message)s")
     fmt.default_msec_format = None
     handler.setFormatter(fmt)
-    handler.setLevel(logging.WARNING)
+    handler.setLevel(logging.INFO)
+
+    logging.getLogger("discord").addHandler(handler)
     bot.logger.addHandler(handler)
 
 
