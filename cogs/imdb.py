@@ -92,7 +92,7 @@ class Imdb(commands.Cog):
 
             await ctx.respond(embed=embed)
         else:
-            await ctx.respond(ephemeral=True, content="Please select an option from the lsit, or provide an IMDb ID")
+            await ctx.respond(ephemeral=True, content="Please select an option from the list, or provide an IMDb ID")
 
     async def imdb_autocomplete(self, ctx):
         await ctx.interaction.response.defer()
