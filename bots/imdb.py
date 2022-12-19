@@ -1,4 +1,4 @@
-from .. import bot
+import bot
 import discord
 import os
 from dotenv import load_dotenv
@@ -11,7 +11,7 @@ intents = discord.Intents.default()
 intents.guilds = True
 bot = bot.Bot("imdb", intents=intents)
 
-bot.add_cog(imdb.Imdb(bot, db="sqlite:///imdb.sqlite"))
+bot.add_cog(imdb.Imdb(bot, db="/home/squigz/bots/imdb.sqlite"))
 
 
 bot.run(TOKEN)

@@ -1,4 +1,4 @@
-from .. import bot
+import bot
 import discord
 import logging
 import os
@@ -182,7 +182,6 @@ color_prefix = "[C]"
 bot.add_cog(colors.Colors(bot, color_prefix))
 
 bot.add_cog(memes.Memes(bot))
-bot.add_cog(publisher.AutoPublisher(bot))
 
 
 class Button(discord.ui.Button):
