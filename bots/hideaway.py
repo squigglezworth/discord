@@ -181,8 +181,6 @@ roles = roles.Roles(bot, role_settings)
 color_prefix = "[C]"
 bot.add_cog(colors.Colors(bot, color_prefix))
 
-bot.add_cog(memes.Memes(bot))
-
 
 class Button(discord.ui.Button):
     def __init__(self, ctx, options, buttons=None):

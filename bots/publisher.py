@@ -11,7 +11,7 @@ intents = discord.Intents.default()
 intents.guilds = True
 bot = bot.Bot("publisher", intents=intents)
 
-bot.add_cog(publisher.AutoPublisher(bot))
+bot.add_cog(publisher.AutoPublisher(bot, db="/home/squigz/dev/bots/publisher.sqlite"))
 
 
 bot.run(TOKEN)
