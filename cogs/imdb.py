@@ -21,7 +21,7 @@ class Imdb(commands.Cog):
         WHERE numVotes > 0
         ORDER BY numVotes DESC
         """
-        con = sqlite3.connect(db[10:])
+        con = sqlite3.connect(db)
         cur = con.execute(stmt)
         results = cur.fetchall()
 
