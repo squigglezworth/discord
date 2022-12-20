@@ -46,12 +46,13 @@
 </details>
 
 ## Usage
-Check out [`example.py`](example.py) for basic usage of all these components.
+Check out [`bots/example.py`](bots/example.py) for basic usage of all the cogs
 
-See [`main.py`](main.py) for more practical examples:
-- [Setting up logging](main.py#L123-L134)
-- [Loading some things from `.env`](main.py#L136-L139)
-- [`main.py#L156-L203`](main.py#L156-L203) combines views from `roles` & `colors` in one `/customize` command
+The other bots contain various other practical examples:
+- Several implement the `logging` handler from [`utils/webhook.py`](utils/webhook.py), which posts logging messages to a Discord webhook
+- [`hideaway`](bots/hideaway.py) shows usage of the roles cog, and registers `/customize`, which combines views from both `roles` and `colors` into an interactive menu
+
+In [`supervisor`](supervisor/), you can see some examples on using [supervisord](supervisord.org/) to manage bot instances. [`listener.py`](supervisor/listener.py) can post supervisor events to a Discord webhook
 
 ## Screenshots
 <details>
