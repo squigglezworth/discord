@@ -2,6 +2,7 @@ import bot
 import discord
 import logging
 import os
+from utils.webhook import WebhookHandler
 from discord.ext import commands
 from dotenv import load_dotenv
 from cogs import colors, memes, roles, publisher
@@ -224,7 +225,6 @@ class Button(discord.ui.Button):
         await interaction.response.edit_message(embed=embed, view=view)
 
 
-@commands.slash_command()
 async def customize(ctx):
     """
     Personalize your presence in the server - change the color of your name, add an icon, and more!
@@ -246,6 +246,14 @@ async def customize(ctx):
     )
 
     await ctx.respond(ephemeral=True, embed=embed, view=view)
+
+command = discord.SlashCommand(
+    customize,
+    name="customize",
+    description="Personalize your presence in the server - change the color of your name, add an icon, and more!",
+)
+
+bot.add_application_command(command)
 
 
 bot.logger.info(f"Registering /customize")
