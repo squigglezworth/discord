@@ -1,5 +1,6 @@
 import bot
 import discord
+import logging
 import os
 from utils.webhook import WebhookHandler
 from dotenv import load_dotenv
@@ -12,7 +13,12 @@ intents = discord.Intents.default()
 intents.guilds = True
 bot = bot.Bot("publisher", intents=intents)
 
-bot.add_cog(publisher.AutoPublisher(bot, db="/home/squigz/dev/bots/publisher.sqlite"))
+db = os.getenv("PUBLISHER_DB")
+if not db:
+    logging.getLogger("discord.bot").error("Please specify a PUBLISHER_DB in the .env file")
+    # There's probably a better way of exiting... oh well
+    exit()
+bot.add_cog(publisher.AutoPublisher(bot, db=db))
 
 # Setup webhook logging
 log_webhook = os.getenv("PUBLISHER_LOG_WEBHOOK")
