@@ -159,7 +159,10 @@ role_settings = {
                     [1041322195701481502, "", "📚"],
                     [1041335138434424942, "", "🥐"],
                     [1042121441891582002, "", "💥"],
-                    [1043172047108440104, "", "<:verified:1043172431306702899>"],
+                    [1043172047108440104, "", "<:blueverified:1054604704304336927>"],
+                    [1054605750070161459, "", "<:bluedoubleverified:1054604705638121492>"],
+                    [1054605825534074900, "", "<:goldverified:1054603064876736632>"],
+                    [1054606008598679584, "", "<:doublegoldverified:1054603066608996362>"],
                 ],
             },
         ],
@@ -180,6 +183,18 @@ roles = roles.Roles(bot, role_settings)
 # Prefix your color roles with [C] (or change the prefix)
 color_prefix = "[C]"
 bot.add_cog(colors.Colors(bot, color_prefix))
+
+# Setup webhook logging
+log_webhook = os.getenv("LOG_WEBHOOK")
+if log_webhook:
+    handler = WebhookHandler(log_webhook, color=0x0FF5338)
+    fmt = logging.Formatter(f"%(name)s - %(levelname)s - %(message)s")
+    fmt.default_msec_format = None
+    handler.setFormatter(fmt)
+    handler.setLevel(logging.INFO)
+
+    logging.getLogger("discord").addHandler(handler)
+    bot.logger.addHandler(handler)
 
 
 class Button(discord.ui.Button):
