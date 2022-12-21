@@ -35,7 +35,7 @@
   <hr>
 </details>
 <details>
-  <summary><i><a href="cogs/publisher.py"><b><code>publisher</code></b></a> - <a href="https://top.gg/bot/1052390044889006090"><b>Public bot</b></a> - Automagically publish messages from <a href="https://support.discord.com/hc/en-us/articles/360032008192-Announcement-Channels-">Announcement</a> channels</i></summary>
+  <summary><i><a href="cogs/publisher.py"><b><code>publisher</code></b></a> - <a href="https://top.gg/bot/1052390044889006090"><b>Invite me!</b></a> - Automagically publish messages from <a href="https://support.discord.com/hc/en-us/articles/360032008192-Announcement-Channels-">Announcement</a> channels</i></summary>
 
   - Users have to have the Manage Channels permission to modify settings
   - The bot has to have the Send Messages and Manage Messages permissions on any channel(s) you want to publish from
