@@ -35,13 +35,10 @@
   <hr>
 </details>
 <details>
-  <summary><i><a href="cogs/publisher.py"><b><code>publisher</code></b></a> - <a href="https://top.gg/bot/1052390044889006090"><b>Invite me!</b></a> - Automagically publish messages from <a href="https://support.discord.com/hc/en-us/articles/360032008192-Announcement-Channels-">Announcement</a> channels</i></summary>
-
-  - Users have to have the Manage Channels permission to modify settings
-  - The bot has to have the Send Messages and Manage Messages permissions on any channel(s) you want to publish from
-  - You may have to replace the emojis on [`cogs/publisher.py#L8-L22`](cogs/publisher.py#L8-L22)
+  <summary><i><a href="cogs/simple_publisher.py"><b><code>simple_publisher</code></b></a> - <a href="https://top.gg/bot/1052390044889006090"><b>Invite me!</b></a> - Automagically publish messages from <a href="https://support.discord.com/hc/en-us/articles/360032008192-Announcement-Channels-">Announcement</a> channels</i></summary>
+  
+  - The bot has to have the `View Channel`, `Send Messages`, `Manage Messages` and `Read Message History` permissions on any channel(s) you want to publish from; revoke these permissions to stop it from publishing
   - To use, simply import and register the cog
-  - This will register `/publisher`
   <hr>
 </details>
 
