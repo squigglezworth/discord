@@ -7,7 +7,7 @@ class Bot(Bot):
         super().__init__()
 
         # Setup logging formatter & stream handler
-        fmt = logging.Formatter(f"%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        fmt = logging.Formatter(f"%(asctime)s - %(name)s - %(levelname).4s - %(message)s")
         fmt.default_msec_format = None
         handler = logging.StreamHandler()
         handler.setFormatter(fmt)
