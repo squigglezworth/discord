@@ -159,7 +159,7 @@ class Roles:
 
                     if role in user_roles:
                         # If the user already has the role, remove it
-                        self.cog.logger.info(f"{cog.ctx.command} - Removing roles from {interaction.user} - {role}")
+                        self.cog.logger.info(f"{self.cog.ctx.command} - Removing roles from {interaction.user} - {role}")
 
                         updates += [0, role]
                         user_roles.remove(role)
@@ -168,7 +168,7 @@ class Roles:
                         # If the user doesn't have the role, add it
                         if self.View.menu["max_one"]:
                             # But first, if max_one is set, remove any other roles the user has from this menu
-                            self.cog.logger.info(f"{cog.ctx.command} - max_one specified; removing all roles...")
+                            self.cog.logger.info(f"{self.cog.ctx.command} - max_one specified; removing all roles...")
 
                             roles = self.cog.menu_roles
 
@@ -188,7 +188,7 @@ class Roles:
                             )
                             await interaction.user.edit(roles=user_roles)
 
-                        self.cog.logger.info(f"{cog.ctx.command} - Adding roles to {interaction.user} - {role}")
+                        self.cog.logger.info(f"{self.cog.ctx.command} - Adding roles to {interaction.user} - {role}")
 
                         # Prepare some info for refresh
                         updates += [1, role]

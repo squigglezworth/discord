@@ -4,7 +4,7 @@ import logging
 import os
 from utils.webhook import WebhookHandler
 from dotenv import load_dotenv
-from cogs import publisher
+from cogs import simple_publisher
 
 load_dotenv()
 TOKEN = os.getenv("PUBLISHER_TOKEN")
@@ -18,7 +18,7 @@ if not db:
     logging.getLogger("discord.bot").error("Please specify a PUBLISHER_DB in the .env file")
     # There's probably a better way of exiting... oh well
     exit()
-bot.add_cog(publisher.AutoPublisher(bot, db=db))
+bot.add_cog(simple_publisher.Publisher(bot))
 
 # Setup webhook logging
 log_webhook = os.getenv("PUBLISHER_LOG_WEBHOOK")
