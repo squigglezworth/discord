@@ -85,7 +85,7 @@ class Colors(commands.Cog):
 
             for r in interaction.user.roles:
                 if pattern.match(r.name):
-                    self.logger.info(f"colors - Removing color from {interaction.user}")
+                    self.cog.logger.info(f"colors - Removing color from {interaction.user}")
 
                     await interaction.user.remove_roles(r)
                     LastUpdate = [0, r]
@@ -94,12 +94,12 @@ class Colors(commands.Cog):
                 role = interaction.guild.get_role(int(r))
 
                 if role in interaction.user.roles:
-                    self.logger.info(f"colors - Removing color from {interaction.user}")
+                    self.cog.logger.info(f"colors - Removing color from {interaction.user}")
 
                     await interaction.user.remove_roles(role)
                     LastUpdate = [0, role]
                 else:
-                    self.logger.info(f"colors - Adding color to {interaction.user}")
+                    self.cog.logger.info(f"colors - Adding color to {interaction.user}")
 
                     await interaction.user.add_roles(role)
                     LastUpdate = [1, role]

@@ -5,7 +5,7 @@ import os
 from utils.webhook import WebhookHandler
 from discord.ext import commands
 from dotenv import load_dotenv
-from cogs import colors, memes, roles, publisher
+from cogs import colors, memes, roles, publisher, f1
 
 role_settings = {
     "roles": {
@@ -171,19 +171,25 @@ role_settings = {
 }
 
 load_dotenv()
+
 TOKEN = os.getenv("DEBUG_TOKEN") if os.getenv("DEBUG") == "True" else os.getenv("PROD_TOKEN")
 GUILDS = [int(g) for g in os.getenv("GUILDS").split(",")] if os.getenv("GUILDS") else []
 
+# Hideaway bot
 intents = discord.Intents.default()
 intents.guilds = True
 bot = bot.Bot("hideaway", intents=intents, debug_guilds=GUILDS)
-
-# Register role menus
+# Roles cog
 roles = roles.Roles(bot, role_settings)
-
-# Prefix your color roles with [C] (or change the prefix)
+# Color roles cog
 color_prefix = "[C]"
 bot.add_cog(colors.Colors(bot, color_prefix))
+# F1 Notification cog
+db = os.getenv("F1_DB") or "f1.sqlite"
+channel = os.getenv("F1_CHANNEL")
+perm_channel = os.getenv("F1_PERMCHANNEL")
+role = os.getenv("F1_ROLE")
+bot.add_cog(f1.F1(bot, db, role, channel, perm_channel))
 
 # Setup webhook logging
 log_webhook = os.getenv("LOG_WEBHOOK")
@@ -196,6 +202,8 @@ if log_webhook:
 
     logging.getLogger("discord").addHandler(handler)
     bot.logger.addHandler(handler)
+
+# Setup & register /customize
 
 
 class Button(discord.ui.Button):
@@ -246,6 +254,7 @@ async def customize(ctx):
     )
 
     await ctx.respond(ephemeral=True, embed=embed, view=view)
+
 
 command = discord.SlashCommand(
     customize,

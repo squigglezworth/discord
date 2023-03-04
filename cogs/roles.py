@@ -218,7 +218,7 @@ class Roles:
                 """
                 Callback for the clear button
                 """
-                self.cog.logger.info(f"{cog.ctx.command} - Clearing all roles from {interaction.user}")
+                self.cog.logger.info(f"{self.cog.ctx.command} - Clearing all roles from {interaction.user}")
 
                 updates = []
                 for r in filter(lambda r: r.id in self.cog.menu_roles, interaction.user.roles):
