@@ -42,6 +42,7 @@ role_settings = {
                 "randomize": 0,
                 "roles": [
                     # [<id>, "<description>", "<emoji>"]
+                    [1045112190803386389, "Get pinged about EVE updates", "<:eve:787273908528349204>"],
                     [
                         786356797429514261,
                         "General EVE Online role",
@@ -90,7 +91,8 @@ role_settings = {
                         "Grants access to the neurodivergent chat channel",
                         "<:NeurodiversityPride:1037203581733974026>",
                     ],
-                    [972970423744610374, "", "<:f1:835693536640761856>"],
+                    [972970423744610374, "Share F1 racing stuff with other fans", "<:f1:835693536640761856>"],
+                    [1081085816778014750, "Get notified about new races", "<:f1:835693536640761856>"],
                     [972970633174614058, "", "📚"],
                     [1020370146063286423, "Visit the #book-club channel to share what you're reading!", "📖"],
                     [972970544670584852, "", "🎬"],
