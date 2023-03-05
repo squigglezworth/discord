@@ -38,6 +38,7 @@ class F1(commands.Cog):
         cur = con.cursor()
         results = cur.execute(stmt).fetchall()
         embeds = []
+        self.logger.info(f"Found {len(results)}")
         for event in results:
             rowid = event[0]
             sessions = ast.literal_eval(event[7])
@@ -57,8 +58,9 @@ class F1(commands.Cog):
             cur.execute(f"UPDATE events SET sent = 1 WHERE ROWID = {rowid}")
             con.commit()
 
-        channel = self.bot.get_channel(int(self.channel))
-        await channel.send(content=f"<@&{self.role}>", embeds=embeds)
+        if embeds:
+            channel = self.bot.get_channel(int(self.channel))
+            await channel.send(content=f"<@&{self.role}>", embeds=embeds)
 
     @notification.before_loop
     async def before_printer(self):
